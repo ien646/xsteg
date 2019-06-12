@@ -32,6 +32,6 @@ namespace xsteg
         void save_to_file(const std::string& fname);
 
     private:
-        size_t decode_size_header();
+        size_t decode_size_header(size_t& skipped_px);
     };
 }
