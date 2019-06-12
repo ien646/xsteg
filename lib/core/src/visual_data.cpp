@@ -93,4 +93,24 @@ namespace xsteg
         }
         return result;
     }
+
+    image generate_visual_data_diff_map(
+        const image* imgptr, 
+        visual_data_type type,
+        float val_diff)
+    {
+        image result(imgptr->width(), imgptr->height());
+        for(size_t i = 0; i < imgptr->pixel_count(); ++i)
+        {
+            const uint8_t* pxptr = imgptr->cdata() + (i * 4);
+            float val = get_visual_data(pxptr, type, pixel_availability(0, 0, 0, 0));
+            val = val > val_diff ? 0.0F : 1.0F;
+            assert(val <= 1.0F && val >= 0.0F);
+            uint8_t val8 = static_cast<uint8_t>(val * 255);
+            uint8_t* px = result.pixel_at_idx(i);
+            uint8_t new_px[4] = { val8, val8, val8, 255 };
+            std::memcpy(px, new_px, 4);
+        }
+        return result;
+    }
 }

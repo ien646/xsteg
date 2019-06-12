@@ -23,7 +23,12 @@ namespace xsteg
         visual_data_type type,
         pixel_availability truncate_bits);
 
-    extern std::unique_ptr<image> generate_visual_data_map(
+    extern image generate_visual_data_map(
         const image* imgptr, 
         visual_data_type type);
+
+    extern image generate_visual_data_diff_map(
+        const image* imgptr, 
+        visual_data_type type,
+        float val_diff);
 }
