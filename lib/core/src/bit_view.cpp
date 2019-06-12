@@ -15,7 +15,7 @@ namespace xsteg
 
         size_t byte_idx = index / 8;
         size_t bit_idx = index % 8;
-        uint8_t mask = (uint8_t)1 << bit_idx;
+        uint8_t mask = (uint8_t)1 << (7 - bit_idx);
         uint8_t byte = _data_ptr[byte_idx];
 
         return (byte | mask) == byte;

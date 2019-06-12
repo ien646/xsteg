@@ -5,11 +5,11 @@ namespace xsteg
 {
     std::vector<bool> get_last_bits(uint8_t byte, size_t bits)
     {
-        assert(bits <= 8 && bits >= 0);
+        assert(bits <= 8 && bits > 0);
         std::vector<bool> result;
         while(bits > 0)
         {
-            uint8_t mask = (uint8_t)1 << bits;
+            uint8_t mask = (uint8_t)1 << (bits - 1);
             result.push_back((byte | mask) == byte);
             --bits;
         }
@@ -23,6 +23,8 @@ namespace xsteg
         {
             uint8_t bit = (uint8_t)(bits[i] ? 1 : 0);
             uint8_t mask = bit << (bits.size() - 1 - i);
+            uint8_t clear_mask = ~(1 << (bits.size() - 1 - i));
+            *byteptr &= clear_mask;
             *byteptr |= mask;
         }
     }

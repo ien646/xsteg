@@ -43,7 +43,7 @@ namespace xsteg
         for(size_t i = 0; i < 8; ++i)
         {
             uint8_t byte = static_cast<uint8_t>(sz >> ((7 - i) * 8));
-            result.push_back(byte);
+            result[i] = byte;
         }
         return result;
     }
@@ -69,7 +69,7 @@ namespace xsteg
         while (current_bit < 64)
         {
             size_t bit = static_cast<size_t>(data[current_bit] ? 1 : 0);
-            size_t mask = bit << (7 - current_bit);
+            size_t mask = bit << (7 - (current_bit%8));
 
             size_t byte_idx = current_bit / 8;
             result[byte_idx] |= mask;
@@ -108,15 +108,15 @@ namespace xsteg
                 << std::endl;
         }
 
-        bit_view bits(data, len);
+        bit_view bits(inter_data.data(), bit_len);
         
         size_t current_bit = 0;
         auto request_bits = [&](size_t count) -> std::vector<bool>
-        {
+        {            
             auto result = bits.get_bits_at(current_bit, count);
             current_bit += result.size();
             return result;
-        };        
+        };
 
         size_t cur_pixel = 0;
         auto space_it = space_map.begin();
@@ -125,7 +125,7 @@ namespace xsteg
         while(current_bit < bit_len)
         {
             auto av_bits = *space_it;
-            uint8_t* pxptr = _img->data() + cur_pixel;
+            uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
             if(!av_bits.is_zero())
             {
@@ -142,7 +142,8 @@ namespace xsteg
 
     std::vector<uint8_t> steganographer::read_data()
     {
-        size_t bit_len = decode_size_header();
+        size_t init_data_px_idx = 0;
+        size_t bit_len = decode_size_header(init_data_px_idx);
 
         std::vector<bool> read_bits;
         read_bits.reserve(bit_len);
@@ -156,37 +157,46 @@ namespace xsteg
         while(current_bit < bit_len)
         {
             auto av_bits = *space_it;
-            uint8_t* pxptr = _img->data() + cur_pixel;
+            uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
             if(!av_bits.is_zero())
             {
                 if(av_bits.r)
-                { 
+                {
                     auto bits = get_last_bits(*(pxptr + 0), av_bits.r);
                     std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
+                    current_bit += bits.size();
                 }
                 if(av_bits.g)
                 { 
                     auto bits = get_last_bits(*(pxptr + 1), av_bits.g);
                     std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
+                    current_bit += bits.size();
                 }
                 if(av_bits.b)
                 { 
                     auto bits = get_last_bits(*(pxptr + 2), av_bits.b);
                     std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
+                    current_bit += bits.size();
                 }
                 if(av_bits.a)
                 { 
                     auto bits = get_last_bits(*(pxptr + 3), av_bits.a);
                     std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
+                    current_bit += bits.size();
                 }
             }
 
             ++space_it;
             ++cur_pixel;
         }
+        auto allbytes = get_bytes_from_bits(read_bits, 8);
+        size_t byte_count = (bit_len / 8) - 8;
+        std::vector<uint8_t> result;
+        result.reserve(byte_count);
 
-        return get_bytes_from_bits(read_bits, 8);
+        std::copy(allbytes.begin() + 8, allbytes.begin() + 8 + byte_count, std::back_inserter(result));
+        return result;
     }
 
     void steganographer::save_to_file(const std::string& fname)
@@ -194,7 +204,7 @@ namespace xsteg
         _img->write_to_file(fname);        
     }
 
-    size_t steganographer::decode_size_header()
+    size_t steganographer::decode_size_header(size_t& skipped_pixels)
     {
         auto& space_map = _av_map->available_map();
         auto space_it = space_map.begin();
@@ -208,12 +218,12 @@ namespace xsteg
         while(sz_bits.size() < 64)
         {
             auto av_bits = *space_it;
-            uint8_t* pxptr = _img->data() + cur_pixel;
+            uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
             if(!av_bits.is_zero())
             {
-                if(av_bits.r) 
-                { 
+                if(av_bits.r)
+                {
                     auto bits = get_last_bits(*(pxptr + 0), av_bits.r);
                     std::copy(bits.begin(), bits.end(), std::back_inserter(sz_bits));
                 }
@@ -237,6 +247,8 @@ namespace xsteg
             ++space_it;
             ++cur_pixel;
         }
+
+        skipped_pixels = cur_pixel;
 
         sz_bits.resize(64, 0x00u); // clamp to 64 bits
         std::vector<uint8_t> sz_bytes = get_size_bytes_from_bits(sz_bits);
