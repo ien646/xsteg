@@ -20,6 +20,7 @@ namespace xsteg
         float val, 
         pixel_availability bits)
     {
+        _modified = true;
         availability_threshold thresh;
         thresh.data_type = type;
         thresh.direction = dir;
@@ -52,6 +53,8 @@ namespace xsteg
 
     void availability_map::apply_thresholds()
     {
+        if(!_modified) { return; }
+        
         int th_i = 0;
         for(auto& [type, thres] : _thresholds)
         {

@@ -52,6 +52,7 @@ namespace xsteg
         std::vector<pixel_availability> _map;
         std::map<visual_data_type, availability_threshold> _thresholds;
         pixel_availability _max_threshold_bits;
+        bool _modified = true;
 
     public:
         availability_map(const image* imgptr);

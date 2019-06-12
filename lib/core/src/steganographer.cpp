@@ -28,6 +28,12 @@ namespace xsteg
         return _av_map->generate_key();
     }
 
+    size_t steganographer::available_space_bits()
+    {
+        _av_map->apply_thresholds();
+        return _av_map->available_data_space();
+    }
+
     void steganographer::restore_key(const std::string& key)
     {
         _av_map->restore_from_key(key);
