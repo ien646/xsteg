@@ -24,9 +24,14 @@ namespace xsteg
             pixel_availability bits);
 
         std::string get_key();
+        void restore_key(const std::string& key);
 
         void write_data(uint8_t* data, size_t len);
+        std::vector<uint8_t> read_data();
         
         void save_to_file(const std::string& fname);
+
+    private:
+        size_t decode_size_header();
     };
 }
