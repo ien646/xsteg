@@ -33,4 +33,27 @@ namespace xsteg
         uint8_t mask = (uint8_t)1 << idx;
         return (byte | mask) == byte;
     }
+
+    std::vector<uint8_t> get_bytes_from_bits(const std::vector<bool>& data, size_t offset_bytes)
+    {
+        assert((offset_bytes * 8) < data.size());
+        std::vector<uint8_t> result;   
+        result.resize((data.size() - (offset_bytes * 8)) * 8, 0x00u);
+
+        size_t current_bit = offset_bytes * 8;
+        while(current_bit < data.size())
+        {
+            size_t bit_offset = current_bit % 8;
+            size_t byte_idx = current_bit / 8;
+
+            uint8_t bit = (uint8_t)(data[current_bit] ? 1 : 0);
+            
+            uint8_t mask = (uint8_t)bit << (7 - bit_offset);
+            result[byte_idx] |= mask;
+
+            ++current_bit;
+        }
+
+        return result;
+    }
 }
