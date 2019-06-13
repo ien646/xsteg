@@ -95,7 +95,7 @@ namespace xsteg
         std::vector<uint8_t> inter_data;
         inter_data.resize(len + 8, 0x00u);
 
-        std::memcpy(inter_data.data(), size_data.data(), 8);        
+        std::memcpy(inter_data.data(), size_data.data(), 8);
         std::memcpy(inter_data.data() + 8, data, len);
         
         auto& space_map = _av_map->available_map();
@@ -115,21 +115,31 @@ namespace xsteg
         }
 
         bit_view bits(inter_data.data(), bit_len);
-        
+        size_t report_counter = 0;
+
         size_t current_bit = 0;
         auto request_bits = [&](size_t count) -> std::vector<bool>
-        {            
+        {
             auto result = bits.get_bits_at(current_bit, count);
-            current_bit += result.size();
+            size_t added_bits = result.size();
+            current_bit += added_bits;
+            report_counter += added_bits;
             return result;
         };
 
         size_t cur_pixel = 0;
         auto space_it = space_map.begin();
 
+        std::cout << "Encoding data..." << std::endl;
+
         // Encode data
         while(current_bit < bit_len)
         {
+            if(report_counter > 100)
+            {
+                report_counter = 0;
+                std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
+            }
             auto av_bits = *space_it;
             uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
@@ -144,12 +154,17 @@ namespace xsteg
             ++space_it;
             ++cur_pixel;
         }
+        std::cout << "(bits)[" << current_bit << "/" << bit_len 
+            << "] COMPLETE!" << std::endl;
     }
 
     std::vector<uint8_t> steganographer::read_data()
     {
         size_t init_data_px_idx = 0;
+
+        std::cout << "Decoding size header..."  << std::endl;
         size_t bit_len = decode_size_header(init_data_px_idx);
+        std::cout << "Done! [" << bit_len << "]bits" << std::endl;
 
         std::vector<bool> read_bits;
         read_bits.reserve(bit_len);
@@ -159,9 +174,26 @@ namespace xsteg
         size_t cur_pixel = 0;
         auto space_it = space_map.begin();
 
+        std::cout << "Reading data..." << std::endl;
+        size_t report_counter = 0;
         size_t current_bit = 0;
+
+        auto read_seq = [&](uint8_t px_sgmt, int bit_count)
+        {
+            auto bits = get_last_bits(px_sgmt, bit_count);
+            std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
+            size_t added_bits = bits.size();
+            report_counter += added_bits;
+            current_bit += added_bits;
+        };
+
         while(current_bit < bit_len)
         {
+            if(report_counter > 100)
+            {
+                report_counter = 0;
+                std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
+            }
             auto av_bits = *space_it;
             uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
@@ -169,33 +201,29 @@ namespace xsteg
             {
                 if(av_bits.r)
                 {
-                    auto bits = get_last_bits(*(pxptr + 0), av_bits.r);
-                    std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
-                    current_bit += bits.size();
+                    read_seq(*(pxptr + 0), av_bits.r);
                 }
                 if(av_bits.g)
                 { 
-                    auto bits = get_last_bits(*(pxptr + 1), av_bits.g);
-                    std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
-                    current_bit += bits.size();
+                    read_seq(*(pxptr + 1), av_bits.g);
                 }
                 if(av_bits.b)
                 { 
-                    auto bits = get_last_bits(*(pxptr + 2), av_bits.b);
-                    std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
-                    current_bit += bits.size();
+                    read_seq(*(pxptr + 2), av_bits.b);
                 }
                 if(av_bits.a)
                 { 
-                    auto bits = get_last_bits(*(pxptr + 3), av_bits.a);
-                    std::copy(bits.begin(), bits.end(), std::back_inserter(read_bits));
-                    current_bit += bits.size();
+                    read_seq(*(pxptr + 3), av_bits.a);
                 }
             }
 
             ++space_it;
             ++cur_pixel;
         }
+
+        std::cout << "(bits)[" << current_bit << "/" << bit_len 
+            << "] COMPLETE!" << std::endl;
+
         auto allbytes = get_bytes_from_bits(read_bits, 8);
         size_t byte_count = (bit_len / 8) - 8;
         std::vector<uint8_t> result;
@@ -207,11 +235,11 @@ namespace xsteg
 
     void steganographer::save_to_file(const std::string& fname)
     {
-        _img->write_to_file(fname);        
+        _img->write_to_file(fname);
     }
 
     size_t steganographer::decode_size_header(size_t& skipped_pixels)
-    {
+    {        
         auto& space_map = _av_map->available_map();
         auto space_it = space_map.begin();
         
