@@ -11,6 +11,12 @@
 
 namespace xsteg
 {
+	const std::array<int, 8> truncation_values
+	{
+		SCINT(std::pow(2, 0)), SCINT(std::pow(2, 1)), SCINT(std::pow(2, 2)), SCINT(std::pow(2, 3)),
+		SCINT(std::pow(2, 4)), SCINT(std::pow(2, 5)), SCINT(std::pow(2, 6)), SCINT(std::pow(2, 7)),
+	};
+
     float get_visual_data(
         const uint8_t* px, 
         visual_data_type type, 
@@ -24,10 +30,10 @@ namespace xsteg
         uint8_t tpx[4];
         std::memcpy(tpx, px, 4);
 
-        tpx[0] /= SCINT(std::pow(2, truncate_bits.r)); 
-        tpx[1] /= SCINT(std::pow(2, truncate_bits.g)); 
-        tpx[2] /= SCINT(std::pow(2, truncate_bits.b)); 
-        tpx[3] /= SCINT(std::pow(2, truncate_bits.a)); 
+        tpx[0] /= truncation_values[truncate_bits.r];
+        tpx[1] /= truncation_values[truncate_bits.g];
+        tpx[2] /= truncation_values[truncate_bits.b];
+        tpx[3] /= truncation_values[truncate_bits.a];
 
         switch (type)
         {
@@ -59,15 +65,15 @@ namespace xsteg
             }
             case visual_data_type::LUMINANCE:
             {
-                uint8_t max_rgb = *std::max_element(tpx, tpx + 3);
-                uint8_t min_rgb = *std::min_element(tpx, tpx + 3);
+				uint8_t max_rgb = std::max({ tpx[0], tpx[1], tpx[2] });
+				uint8_t min_rgb = std::min({ tpx[0], tpx[1], tpx[2] });
 
                 return std::abs((0.5F * (max_rgb + min_rgb)) / 255.0F);
             }
             case visual_data_type::SATURATION:
             {
-                uint8_t max_rgb = *std::max_element(tpx, tpx + 3);
-                uint8_t min_rgb = *std::min_element(tpx, tpx + 3);
+				uint8_t max_rgb = std::max({tpx[0], tpx[1], tpx[2]});
+				uint8_t min_rgb = std::min({tpx[0], tpx[1], tpx[2]});
 
                 return SCFLOAT(max_rgb - min_rgb) / max_rgb;
             }

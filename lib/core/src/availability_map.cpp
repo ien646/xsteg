@@ -62,7 +62,7 @@ namespace xsteg
             std::cout << "Applying threshold [" << th_i << "/" 
                 << _thresholds.size() << "]" << std::endl;
 
-            size_t report_threshold = std::max(_img->pixel_count() / 400, (size_t)5);
+            size_t report_threshold = std::max(_img->pixel_count() / 200, (size_t)5);
             for(size_t i = 0; i < _img->pixel_count(); ++i)
             {
                 float pxv = get_visual_data(
@@ -76,10 +76,10 @@ namespace xsteg
 
                 if(pxv >= thres.value)
                 {
-                     _map.at(i).r = thres.bits.r;
-                     _map.at(i).g = thres.bits.g;
-                     _map.at(i).b = thres.bits.b;
-                     _map.at(i).a = thres.bits.a;
+                     _map[i].r = thres.bits.r;
+                     _map[i].g = thres.bits.g;
+                     _map[i].b = thres.bits.b;
+                     _map[i].a = thres.bits.a;
                 }
                 if(i % report_threshold == 0)
                 {
