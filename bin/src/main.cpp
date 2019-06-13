@@ -14,6 +14,7 @@ using namespace xsteg;
 // xsteg -e -t SATURATION UP 0.5 1210 -ii tt.png -oi tt2.png -df hello.txt
 // xsteg -d -t SATURATION UP 0.5 1210 -ii tt2.png -o
 // xsteg -d -t SATURATION UP 0.5 1210 -ii tt2.png -of hello2.txt
+// xsteg -m -t SATURATION UP 0.5 1210 -ii tt2.png -oi tt3.png
 
 std::map<std::string, visual_data_type> visual_data_type_name_map = 
 {
@@ -38,6 +39,7 @@ enum class encode_mode
     NOT_SET,
     ENCODE,
     DECODE,
+    DIFF_MAP
 };
 
 void str_toupper(std::string& str)
@@ -151,6 +153,10 @@ main_args parse_main_args(int argc, char** argv)
             ifs.read(data_ptr, fsize);
             ifs.close();
         }
+        else if(arg == "-m")
+        {
+            result.mode = encode_mode::DIFF_MAP;
+        }
     }
     return result;
 }
@@ -189,6 +195,13 @@ void decode(main_args args)
     }
 }
 
+void diff_map(main_args args)
+{
+    image img(args.input_img);
+    image diff_map = generate_visual_data_diff_map(&img, args.thresholds[0].data_type, args.thresholds[0].value);
+    diff_map.write_to_file(args.output_img);
+}
+
 int main(int argc, char** argv)
 {
     main_args margs = parse_main_args(argc, argv);
@@ -203,6 +216,10 @@ int main(int argc, char** argv)
     else if(margs.mode == encode_mode::DECODE)
     {
         decode(margs);
+    }
+    else if(margs.mode == encode_mode::DIFF_MAP)
+    {
+        diff_map(margs);
     }
     return 0;
 }
