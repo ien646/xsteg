@@ -132,10 +132,12 @@ namespace xsteg
 
         std::cout << "Encoding data..." << std::endl;
 
+        size_t report_threshold = std::max(bit_len / 1000, (size_t)1);
+
         // Encode data
         while(current_bit < bit_len)
         {
-            if(report_counter > 100)
+            if(report_counter > report_threshold)
             {
                 report_counter = 0;
                 std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
@@ -187,9 +189,11 @@ namespace xsteg
             current_bit += added_bits;
         };
 
+        size_t report_threshold = std::max(bit_len / 1000, (size_t)1);
+
         while(current_bit < bit_len)
         {
-            if(report_counter > 100)
+            if(report_counter > report_threshold)
             {
                 report_counter = 0;
                 std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
