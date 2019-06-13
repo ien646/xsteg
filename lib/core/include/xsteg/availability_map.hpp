@@ -50,7 +50,7 @@ namespace xsteg
     private:
         const image* _img = nullptr;
         std::vector<pixel_availability> _map;
-        std::map<visual_data_type, availability_threshold> _thresholds;
+        std::vector<availability_threshold> _thresholds;
         pixel_availability _max_threshold_bits;
         bool _modified = true;
 

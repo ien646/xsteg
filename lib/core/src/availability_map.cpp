@@ -26,7 +26,7 @@ namespace xsteg
         thresh.direction = dir;
         thresh.value = val;
         thresh.bits = bits;
-        _thresholds.emplace(type, thresh);
+        _thresholds.push_back(thresh);
 
         _max_threshold_bits.a = 
             std::max(_max_threshold_bits.a, thresh.bits.a);
@@ -56,14 +56,18 @@ namespace xsteg
         if(!_modified) { return; }
         
         int th_i = 0;
-        for(auto& [type, thres] : _thresholds)
+        for(auto& thres : _thresholds)
         {
             ++th_i;
             std::cout << "Applying threshold [" << th_i << "/" 
                 << _thresholds.size() << "]" << std::endl;
             for(size_t i = 0; i < _img->pixel_count(); ++i)
             {
-                float pxv = get_visual_data(_img->cpixel_at_idx(i), type, thres.bits);
+                float pxv = get_visual_data(
+                    _img->cpixel_at_idx(i), 
+                    thres.data_type, 
+                    thres.bits
+                );
                 bool cond = (thres.direction == threshold_direction::UP)
                             ? pxv >= thres.value
                             : pxv <= thres.value;
@@ -136,11 +140,11 @@ namespace xsteg
     std::string availability_map::generate_key()
     {
         std::stringstream ss;
-        for(auto& [type, threshold] : _thresholds)
+        for(auto& threshold : _thresholds)
         {
             bool up = threshold.direction == threshold_direction::UP;
             ss  << TYPE_DESIGNATOR
-                << type_designators[type] 
+                << type_designators[threshold.data_type] 
                 << DIRECTION_DESIGNATOR
                 << (up ? 'A' : 'V')
                 << BITS_OV_DESIGNATOR

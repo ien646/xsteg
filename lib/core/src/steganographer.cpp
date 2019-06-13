@@ -235,11 +235,14 @@ namespace xsteg
 
     void steganographer::save_to_file(const std::string& fname)
     {
+        std::cout << "Saving to file... [" << fname << "]" << std::endl;
         _img->write_to_file(fname);
+        std::cout << "Done!" << std::endl;
     }
 
     size_t steganographer::decode_size_header(size_t& skipped_pixels)
     {        
+        _av_map->apply_thresholds();
         auto& space_map = _av_map->available_map();
         auto space_it = space_map.begin();
         

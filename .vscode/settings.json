@@ -48,6 +48,8 @@
         "xtree": "cpp",
         "iostream": "cpp",
         "ratio": "cpp",
-        "sstream": "cpp"
+        "sstream": "cpp",
+        "cctype": "cpp",
+        "fstream": "cpp"
     }
 }
