@@ -183,7 +183,7 @@ void decode(main_args args)
     }
     if(!args.output_file.empty())
     {
-        std::ofstream ofs(args.output_file);
+        std::ofstream ofs(args.output_file, std::ios_base::binary);
         ofs.write(reinterpret_cast<char*>(data.data()), data.size());
         ofs.close();
     }
