@@ -5,12 +5,48 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "(Windows) Launch",
+            "name": "Encode text",
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build_debug_win64/output/bin/xsteg/xsteg.exe",
-            "args": ["-d", "-t", "SATURATION", "UP", "0.5", "1210",
-                 "-ii", "tt2.png", "-of", "hellow.txt"],
+            "args": ["-e", "-t", "COLOR_BLUE", "UP", "0.05", "0020",
+                 "-ii", "sunrise.jpg", "-oi", "sunrise.encoded.png", "-df", "text.txt"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
+            "name": "Decode text",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug_win64/output/bin/xsteg/xsteg.exe",
+            "args": ["-d", "-t", "COLOR_BLUE", "UP", "0.05", "0020",
+                 "-ii", "sunrise.encoded.png", "-of", "decoded.txt"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
+            "environment": [],
+            "externalConsole": true
+        }
+        {
+            "name": "Encode oimg",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug_win64/output/bin/xsteg/xsteg.exe",
+            "args": ["-e", "-t", "COLOR_BLUE", "UP", "0.05", "0020",
+                 "-ii", "sunrise.jpg", "-oi", "sunrise.encoded.png", "-df", "oimg.jpg"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
+            "name": "Decode oimg",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug_win64/output/bin/xsteg/xsteg.exe",
+            "args": ["-d", "-t", "COLOR_BLUE", "UP", "0.05", "0020",
+                 "-ii", "sunrise.encoded.png", "-of", "oimg.decoded.jpg"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
             "environment": [],
