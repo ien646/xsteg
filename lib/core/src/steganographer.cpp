@@ -60,7 +60,7 @@ namespace xsteg
         size_t result = 0;
         for(size_t i = 0; i < 8; ++i)
         {
-            size_t segment = static_cast<size_t>(data[i]) << (7 - i);
+            size_t segment = static_cast<size_t>(data[i]) << ((7 - i) * 8);
             result |= segment;
         }
         return result;
