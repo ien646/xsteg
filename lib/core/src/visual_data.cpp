@@ -3,6 +3,7 @@
 #include <numeric>
 #include <algorithm>
 #include <cassert>
+#include <array>
 
 #include <xsteg/availability_map.hpp>
 
@@ -11,10 +12,10 @@
 
 namespace xsteg
 {
-	const std::array<int, 8> truncation_values
+	const std::array<uint8_t, 8> truncation_masks
 	{
-		SCINT(std::pow(2, 0)), SCINT(std::pow(2, 1)), SCINT(std::pow(2, 2)), SCINT(std::pow(2, 3)),
-		SCINT(std::pow(2, 4)), SCINT(std::pow(2, 5)), SCINT(std::pow(2, 6)), SCINT(std::pow(2, 7)),
+		0xFFu, 0xFEu, 0xFCu, 0xF8u,
+        0xF0u, 0xE0u, 0xC0u, 0x80u
 	};
 
     float get_visual_data(
@@ -30,10 +31,10 @@ namespace xsteg
         uint8_t tpx[4];
         std::memcpy(tpx, px, 4);
 
-        tpx[0] /= truncation_values[truncate_bits.r];
-        tpx[1] /= truncation_values[truncate_bits.g];
-        tpx[2] /= truncation_values[truncate_bits.b];
-        tpx[3] /= truncation_values[truncate_bits.a];
+        tpx[0] &= truncation_masks[truncate_bits.r];
+        tpx[1] &= truncation_masks[truncate_bits.g];
+        tpx[2] &= truncation_masks[truncate_bits.b];
+        tpx[3] &= truncation_masks[truncate_bits.a];
 
         switch (type)
         {
