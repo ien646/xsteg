@@ -1,10 +1,14 @@
 #include <xsteg/availability_map.hpp>
 
+#include <xsteg/runtime_settings.hpp>
 #include <algorithm>
 #include <sstream>
 #include <map>
 #include <iostream>
 #include <cassert>
+#include <thread>
+#include <mutex>
+#include <chrono>
 
 namespace xsteg
 {
@@ -53,6 +57,7 @@ namespace xsteg
 
     void availability_map::apply_thresholds()
     {
+        static unsigned int max_threads = std::thread::hardware_concurrency();
         if(!_modified) { return; }
         
         int th_i = 0;
@@ -62,30 +67,74 @@ namespace xsteg
             std::cout << "Applying threshold [" << th_i << "/" 
                 << _thresholds.size() << "]" << std::endl;
 
-            size_t report_threshold = std::max(_img->pixel_count() / 200, (size_t)5);
-            for(size_t i = 0; i < _img->pixel_count(); ++i)
-            {
-                float pxv = get_visual_data(
-                    _img->cpixel_at_idx(i), 
-                    thres.data_type, 
-                    thres.bits
-                );
-                bool cond = (thres.direction == threshold_direction::UP)
-                            ? pxv >= thres.value
-                            : pxv <= thres.value;
+            const size_t pixel_count =_img->pixel_count();
+            const size_t report_threshold = std::max(pixel_count / 500, (size_t)5);
+            size_t report_th_accum = 0;
 
-                if(pxv >= thres.value)
+            std::mutex report_mex;
+
+            auto thread_segment = [&](size_t from, size_t to)
+            {
+                size_t report_accum = 0;
+                for(size_t i = from; i <= to; ++i)
                 {
-                     _map[i].r = thres.bits.r;
-                     _map[i].g = thres.bits.g;
-                     _map[i].b = thres.bits.b;
-                     _map[i].a = thres.bits.a;
+                    float pxv = get_visual_data(
+                        _img->cpixel_at_idx(i), 
+                        thres.data_type, 
+                        thres.bits
+                    );
+                    bool cond = (thres.direction == threshold_direction::UP)
+                                ? pxv >= thres.value
+                                : pxv <= thres.value;
+
+                    if(pxv >= thres.value)
+                    {
+                        _map[i].r = thres.bits.r;
+                        _map[i].g = thres.bits.g;
+                        _map[i].b = thres.bits.b;
+                        _map[i].a = thres.bits.a;
+                    }
+                    if((report_accum++ > report_threshold) == 0)   
+                    {
+                        if(report_mex.try_lock())
+                        {
+                            report_th_accum += report_accum;
+                            report_accum = 0;
+                            report_mex.unlock();
+                        }
+                    }
                 }
-                if(i % report_threshold == 0)
-                {
-                    std::cout << "> (pixels)[" << i << "/" << _img->pixel_count() << "]\r";
-                }
+            };
+
+            size_t thread_segment_size = pixel_count / max_threads;
+
+            std::vector<std::thread> threads;
+            for(size_t i = 0; i < max_threads - 1; ++i)
+            {
+                size_t from = (i * thread_segment_size);
+                size_t to = from + thread_segment_size;
+                threads.push_back(
+                    std::thread(thread_segment, from, to)
+                );
             }
+
+            bool end_report = false;
+            auto report_thread = std::thread([&]()
+            {
+                if(runtime_settings::verbose)
+                {
+                    while(!end_report)
+                    {
+                        std::cout << "(pixels)[" << report_th_accum << "/" << pixel_count << "]\r";
+                        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                    }
+                }
+            });
+
+            for(auto& th : threads) { th.join(); }
+            end_report = true;
+            report_thread.join();
+            
             std::cout << "> (pixels)[" << _img->pixel_count() << "/" 
                 << _img->pixel_count() << "]\r";
             std::cout << std::endl;
