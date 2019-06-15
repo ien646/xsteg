@@ -1,6 +1,8 @@
 #include <xsteg/image.hpp>
 #include <xsteg/availability_map.hpp>
+
 #include <cassert>
+#include <iostream>
 
 #include "stb_image.h"
 #include "stb_image_write.h"
@@ -72,12 +74,16 @@ namespace xsteg
             4
         );
         _channels = 4;
-        assert(_data != nullptr);
+        if(_data == nullptr)
+        {
+            std::cerr << "Unable to open image file: [" << fname << "]" << std::endl;
+            exit(-1);
+        }
     }
 
     void image::write_to_file(const std::string& fname)
     {
-        stbi_write_png(
+        int result = stbi_write_png(
             fname.c_str(), 
             _width, 
             _height, 
@@ -85,6 +91,11 @@ namespace xsteg
             _data, 
             _width * static_cast<int>(_channels)
         );
+        if(result == 0)
+        {
+            std::cerr << "Unable to save png image file: [" << fname << "]" << std::endl;
+            exit(-1);
+        }
     }
 
     const uint8_t* image::cdata() const
