@@ -4,7 +4,9 @@
 #include <chrono>
 #include <cctype>
 #include <fstream>
+
 #include <xsteg/steganographer.hpp>
+#include <xsteg/runtime_settings.hpp>
 
 using namespace std::chrono_literals;
 using hclock = std::chrono::high_resolution_clock;
@@ -17,7 +19,7 @@ using namespace xsteg;
 // xsteg -m -t SATURATION UP 0.5 1210 -ii tt2.png -oi tt3.png
 // xsteg -vd -ii tt2.png
 
-std::map<std::string, visual_data_type> visual_data_type_name_map = 
+const std::map<std::string, visual_data_type> visual_data_type_name_map = 
 {
     { "ALPHA",              visual_data_type::ALPHA },
     { "AVERAGE_VALUE_RGB",  visual_data_type::AVERAGE_VALUE_RGB },
@@ -29,7 +31,7 @@ std::map<std::string, visual_data_type> visual_data_type_name_map =
     { "SATURATION",         visual_data_type::SATURATION },
 };
 
-std::map<std::string, threshold_direction> threshold_direction_name_map =
+const std::map<std::string, threshold_direction> threshold_direction_name_map =
 {
     { "UP", threshold_direction::UP },
     { "DOWN", threshold_direction::DOWN}
@@ -96,14 +98,16 @@ main_args parse_main_args(int argc, char** argv)
     while (current_arg < argc)
     {
         std::string arg(next_arg());
-        if(arg == "-ii")
-        {
-            result.input_img = next_arg();
-        }
-        else if(arg == "-oi")
-        {
-            result.output_img = next_arg();
-        }
+        if(arg == "-ii")        { result.input_img = next_arg(); }
+        else if(arg == "-oi")   { result.output_img = next_arg(); }
+        else if(arg == "-e")    { result.mode = encode_mode::ENCODE; }
+        else if(arg == "-d")    { result.mode = encode_mode::DECODE; }
+        else if(arg == "-o")    { result.output_std = true; }
+        else if(arg == "-of")   { result.output_file = next_arg(); }
+        else if(arg == "-x")    { result.data = str_to_datavec(next_arg()); }
+        else if(arg == "-m")    { result.mode = encode_mode::DIFF_MAP; }
+        else if(arg == "-vd")   { result.mode = encode_mode::VDATA_MAPS; }
+        else if(arg == "-v")    { runtime_settings::verbose = true; }
         else if(arg == "-t")
         {
             std::string type = next_arg();
@@ -114,32 +118,12 @@ main_args parse_main_args(int argc, char** argv)
             str_toupper(dir);
 
             availability_threshold threshold;
-            threshold.data_type = visual_data_type_name_map[type];
-            threshold.direction = threshold_direction_name_map[dir];
+            threshold.data_type = visual_data_type_name_map.at(type);
+            threshold.direction = threshold_direction_name_map.at(dir);
             threshold.value = std::stof(val);
             threshold.bits = parse_pxav_bits(bits);
             result.thresholds.push_back(threshold);
-        }
-        else if(arg == "-e")
-        {
-            result.mode = encode_mode::ENCODE;
-        }
-        else if(arg == "-d")
-        {
-            result.mode = encode_mode::DECODE;
-        }
-        else if(arg == "-o")
-        {
-            result.output_std = true;
-        }
-        else if(arg == "-of")
-        {
-            result.output_file = next_arg();
-        }
-        else if(arg == "-x")
-        {
-            result.data = str_to_datavec(next_arg());
-        }
+        }        
         else if(arg == "-df")
         {
             std::string datafile = next_arg();
@@ -154,15 +138,7 @@ main_args parse_main_args(int argc, char** argv)
             ifs.seekg(0, std::ios::beg);
             ifs.read(data_ptr, fsize);
             ifs.close();
-        }
-        else if(arg == "-m")
-        {
-            result.mode = encode_mode::DIFF_MAP;
-        }
-        else if(arg == "-vd")
-        {
-            result.mode = encode_mode::VDATA_MAPS;
-        }
+        }        
     }
     return result;
 }

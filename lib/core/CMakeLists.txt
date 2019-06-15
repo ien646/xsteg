@@ -1,11 +1,14 @@
-set(XSTEG_CORE_SOURCES
-    src/image.cpp
+set(XSTEG_CORE_SOURCES    
     src/availability_map.cpp
-    src/visual_data.cpp
-    src/steganographer.cpp
     src/bit_tools.cpp
-    src/bit_view.cpp)
+    src/bit_view.cpp
+    src/image.cpp   
+    src/runtime_settings.cpp
+    src/steganographer.cpp
+    src/visual_data.cpp)
     
+find_package(Threads)
+
 add_library(xsteg.core STATIC ${XSTEG_CORE_SOURCES})
-target_link_libraries(xsteg.core stb)
+target_link_libraries(xsteg.core stb ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories(xsteg.core PUBLIC include)

@@ -1,7 +1,7 @@
 {
     "files.associations": {
-        "*.inl": "cpp",
         "*.cpp": "cpp",
+        "*.inl": "cpp",
         "xlocale": "cpp",
         "xstring": "cpp",
         "xutility": "cpp",
@@ -50,6 +50,13 @@
         "ratio": "cpp",
         "sstream": "cpp",
         "cctype": "cpp",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "functional": "cpp",
+        "list": "cpp",
+        "xthread": "cpp",
+        "thread": "cpp",
+        "unordered_map": "cpp",
+        "xhash": "cpp",
+        "mutex": "cpp"
     }
 }

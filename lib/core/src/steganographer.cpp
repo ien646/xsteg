@@ -2,6 +2,7 @@
 
 #include <xsteg/bit_view.hpp>
 #include <xsteg/bit_tools.hpp>
+#include <xsteg/runtime_settings.hpp>
 
 #include <iostream>
 #include <cassert>
@@ -112,6 +113,7 @@ namespace xsteg
                 << available_space 
                 << "]b for the given destination and thresholds."
                 << std::endl;
+            exit(-1);
         }
 
         bit_view bits(inter_data.data(), bit_len);
@@ -132,12 +134,12 @@ namespace xsteg
 
         std::cout << "Encoding data..." << std::endl;
 
-        size_t report_threshold = std::max(bit_len / 1000, (size_t)1);
+        size_t report_threshold = std::max(bit_len / 250, (size_t)1);
 
         // Encode data
         while(current_bit < bit_len)
         {
-            if(report_counter > report_threshold)
+            if((report_counter > report_threshold) && runtime_settings::verbose)
             {
                 report_counter = 0;
                 std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
@@ -193,7 +195,7 @@ namespace xsteg
 
         while(current_bit < bit_len)
         {
-            if(report_counter > report_threshold)
+            if((report_counter > report_threshold) && runtime_settings::verbose)
             {
                 report_counter = 0;
                 std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
