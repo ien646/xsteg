@@ -2,9 +2,9 @@
 #include <xsteg/availability_map.hpp>
 
 #include <cassert>
-#include <iostream>
-#include <cstring>
 #include <cmath>
+#include <cstring>
+#include <iostream>
 
 #include "stb_image.h"
 #include "stb_image_write.h"

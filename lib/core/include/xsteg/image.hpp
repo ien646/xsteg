@@ -1,8 +1,8 @@
 #pragma once
 
+#include <array>
 #include <cinttypes>
 #include <string>
-#include <array>
 
 namespace xsteg
 {
