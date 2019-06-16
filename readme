@@ -7,7 +7,7 @@ Encoding modes:
     '-d':  Decode
     '-m':  Diff-map
     '-vd': Generate visual-data maps
-	'-gk': Generate thresholds key
+    '-gk': Generate thresholds key
 
 Threshold ('-t') specification:
     [0]: Visual data type
