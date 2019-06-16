@@ -1,11 +1,12 @@
 #include <xsteg/steganographer.hpp>
 
-#include <xsteg/bit_view.hpp>
 #include <xsteg/bit_tools.hpp>
+#include <xsteg/bit_view.hpp>
 #include <xsteg/runtime_settings.hpp>
 
-#include <iostream>
 #include <cassert>
+#include <cstring>
+#include <iostream>
 
 namespace xsteg
 {

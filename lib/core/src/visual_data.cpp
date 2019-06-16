@@ -1,9 +1,10 @@
 #include <xsteg/visual_data.hpp>
 
-#include <numeric>
 #include <algorithm>
-#include <cassert>
 #include <array>
+#include <cassert>
+#include <cstring>
+#include <numeric>
 
 #include <xsteg/availability_map.hpp>
 

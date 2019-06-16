@@ -2,13 +2,13 @@
 
 #include <xsteg/runtime_settings.hpp>
 #include <algorithm>
-#include <sstream>
-#include <map>
-#include <iostream>
 #include <cassert>
-#include <thread>
-#include <mutex>
 #include <chrono>
+#include <iostream>
+#include <map>
+#include <mutex>
+#include <sstream>
+#include <thread>
 
 namespace xsteg
 {

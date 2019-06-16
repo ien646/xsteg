@@ -1,10 +1,11 @@
 #pragma once
 
+#include <xsteg/availability_map.hpp>
 #include <xsteg/image.hpp>
 #include <xsteg/visual_data.hpp>
-#include <xsteg/availability_map.hpp>
-#include <string>
+
 #include <memory>
+#include <string>
 
 namespace xsteg
 {

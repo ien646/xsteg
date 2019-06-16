@@ -3,9 +3,9 @@
 #include <xsteg/image.hpp>
 #include <xsteg/visual_data.hpp>
 
-#include <vector>
-#include <map>
 #include <cinttypes>
+#include <map>
+#include <vector>
 
 namespace xsteg
 {
