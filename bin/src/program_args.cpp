@@ -49,9 +49,9 @@ main_args parse_main_args(int argc, char** argv)
         else if(arg == "-t")
         {
             std::string type = next_arg();
-            std::string dir  = next_arg();
-            std::string val  = next_arg();
+            std::string dir  = next_arg();            
             std::string bits = next_arg();
+            std::string val  = next_arg();
             str_toupper(type);
             str_toupper(dir);
 
