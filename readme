@@ -1,0 +1,54 @@
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+ xsteg - Image steganography tool
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+Encoding modes:
+    '-e':  Encode
+    '-d':  Decode
+    '-m':  Diff-map
+    '-vd': Generate visual-data maps
+
+Threshold ('-t') specification:
+    [0]: Visual data type
+        - Available types:
+         > COLOR_RED
+         > COLOR_GREEN
+         > COLOR_BLUE
+         > ALPHA
+         > AVERAGE_RGB
+         > AVERAGE_RGBA
+         > SATURATION
+         > LUMINANCE
+
+    [1]: Threshold direction
+        - UP: Higher values
+        - DOWN: Lower values
+
+    [2]: Sequence of channel bits (rgba) available per available pixel for encoding
+        - e.g. '1120' means:
+            > 1 bit on red channel
+            > 1 bit on green channel
+            > 2 bits on blue channel
+            > 0 bits on alpha channel
+
+    [3]: Threshold value from 0.00 to 1.00
+
+'-ii': Input image file-path
+'-oi': Output image file-path (encoding, exclusively png format)
+'-of': Output file-path (decoding)
+'-x' : Direct text-data input (encoding, not-recommended)
+'-df': Input data file (encoding)
+
+Command examples:
+
+- Encode a text file, using pixels with color saturation higher than 50% (0.5), 1 bit per color channel.
+    xsteg -e -t SATURATION UP 0.5 1110 -ii image.jpg -oi image.encoded.png -df text.txt
+
+- Decode contents of an encoded image:
+    xsteg -d -t SATURATION UP 0.5 1110 -ii image.encoded.png -of text.decoded.txt
+
+- Generate visual data maps for an image:
+    xsteg -vd -ii image.jpg
+
+- Generate 50% luminance diff-map for an image:
+    xsteg -m -ii image.jpg -t LUMINANCE UP 0000 0.5 -oi image.luminance.50.png

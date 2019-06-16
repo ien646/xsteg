@@ -27,7 +27,7 @@
             "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
             "environment": [],
             "externalConsole": true
-        }
+        },
         {
             "name": "Encode oimg",
             "type": "cppvsdbg",
@@ -47,6 +47,17 @@
             "program": "${workspaceFolder}/build_debug_win64/output/bin/xsteg/xsteg.exe",
             "args": ["-d", "-t", "COLOR_BLUE", "UP", "0.05", "0020",
                  "-ii", "sunrise.encoded.png", "-of", "oimg.decoded.jpg"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
+            "environment": [],
+            "externalConsole": true
+        },
+        {
+            "name": "Show help",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build_debug_win64/output/bin/xsteg/xsteg.exe",
+            "args": ["-h"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
             "environment": [],

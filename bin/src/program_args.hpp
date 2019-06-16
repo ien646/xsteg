@@ -11,7 +11,9 @@ enum class encode_mode
     ENCODE,
     DECODE,
     DIFF_MAP,
-    VDATA_MAPS
+    VDATA_MAPS,
+    GENERATE_KEY,
+    HELP
 };
 
 struct main_args
@@ -23,8 +25,11 @@ struct main_args
     std::vector<uint8_t> data;
     bool output_std = false;
     std::string output_file;
+    std::string restore_key;
 };
 
 extern const std::map<std::string, xsteg::visual_data_type> visual_data_type_name_map;
 extern const std::map<std::string, xsteg::threshold_direction> threshold_direction_name_map;
 extern main_args parse_main_args(int argc, char** argv);
+
+extern const std::string help_text;

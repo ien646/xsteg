@@ -40,11 +40,13 @@ main_args parse_main_args(int argc, char** argv)
         else if(arg == "-oi")   { result.output_img = next_arg(); }
         else if(arg == "-e")    { result.mode = encode_mode::ENCODE; }
         else if(arg == "-d")    { result.mode = encode_mode::DECODE; }
+        else if(arg == "-m")    { result.mode = encode_mode::DIFF_MAP; }
+        else if(arg == "-vd")   { result.mode = encode_mode::VDATA_MAPS; }
+        else if(arg == "-h")    { result.mode = encode_mode::HELP; }
+        else if(arg == "-gk")   { result.mode = encode_mode::GENERATE_KEY; }        
         else if(arg == "-o")    { result.output_std = true; }
         else if(arg == "-of")   { result.output_file = next_arg(); }
         else if(arg == "-x")    { result.data = str_to_datavec(next_arg()); }
-        else if(arg == "-m")    { result.mode = encode_mode::DIFF_MAP; }
-        else if(arg == "-vd")   { result.mode = encode_mode::VDATA_MAPS; }
         else if(arg == "-v")    { runtime_settings::verbose = true; }
         else if(arg == "-t")
         {
@@ -76,7 +78,68 @@ main_args parse_main_args(int argc, char** argv)
             ifs.seekg(0, std::ios::beg);
             ifs.read(data_ptr, fsize);
             ifs.close();
-        }        
+        }   
+        else if(arg == "-rk")
+        {
+            result.restore_key = next_arg();
+        }     
     }
     return result;
 }
+
+const std::string help_text = "\
+|==================================================|\n\
+|---------------------- XSTEG ---------------------|\n\
+|==================================================|\n\
+\n\
+Encoding modes:\n\
+    '-e':  Encode\n\
+    '-d':  Decode\n\
+    '-m':  Diff-map\n\
+    '-vd': Generate visual-data maps\n\
+\n\n\
+Threshold ('-t') specification:\n\
+    [0]: Visual data type\n\
+        - Available types:\n\
+         > COLOR_RED\n\
+         > COLOR_GREEN\n\
+         > COLOR_BLUE\n\
+         > ALPHA\n\
+         > AVERAGE_RGB\n\
+         > AVERAGE_RGBA\n\
+         > SATURATION\n\
+         > LUMINANCE\n\
+\n\
+    [1]: Threshold direction\n\
+        - UP: Higher values\n\
+        - DOWN: Lower values\n\
+\n\
+    [2]: Sequence of channel bits (rgba) available per available pixel for encoding\n\
+        - e.g. '1120' means:\n\
+            > 1 bit on red channel\n\
+            > 1 bit on green channel\n\
+            > 2 bits on blue channel\n\
+            > 0 bits on alpha channel\n\
+\n\
+    [3]: Threshold value from 0.00 to 1.00\n\
+\n\n\
+'-ii': Input image file-path\n\
+'-oi': Output image file-path (encoding, exclusively png format)\n\
+'-of': Output file-path (decoding)\n\
+'-x' : Direct text-data input (encoding, not-recommended)\n\
+'-df': Input data file (encoding)\n\
+\n\n\
+Command examples:\n\
+\n\
+- Encode a text file, using pixels with color saturation higher than 50% (0.5), 1 bit per color channel.\n\
+    xsteg -e -t SATURATION UP 0.5 1110 -ii image.jpg -oi image.encoded.png -df text.txt\n\
+\n\
+- Decode contents of an encoded image:\n\
+    xsteg -d -t SATURATION UP 0.5 1110 -ii image.encoded.png -of text.decoded.txt\n\
+\n\
+- Generate visual data maps for an image:\n\
+    xsteg -vd -ii image.jpg\n\
+\n\
+- Generate 50% luminance diff-map for an image:\n\
+    xsteg -m -ii image.jpg -t LUMINANCE UP 0000 0.5 -oi image.luminance.50.png\n\
+";

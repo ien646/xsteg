@@ -239,6 +239,20 @@ namespace xsteg
 
     void availability_map::restore_from_key(const std::string& key)
     {
+        auto thresholds = parse_key(key);
+        std::move(thresholds.begin(), thresholds.end(), std::back_inserter(_thresholds));
+        _modified = true;
+    }
+
+    const pixel_availability& availability_map::max_threshold_bits()
+    {
+        return _max_threshold_bits;
+    }
+
+    std::vector<availability_threshold> availability_map::parse_key(const std::string& key)
+    {
+        std::vector<availability_threshold> result;
+
         std::vector<std::string> types = 
             str_split(std::string_view(key), TYPE_DESIGNATOR);
 
@@ -259,12 +273,13 @@ namespace xsteg
             if(type[8] != VALUE_DESIGNATOR) { exit(-3); }
             std::string fstr = type.substr(9);
             float val = std::stof(fstr);
-            add_threshold(vdt, dir, val, pixel_availability(br, bg, bb, ba));
+            availability_threshold th;
+            th.data_type = vdt;
+            th.direction = dir;
+            th.value = val;
+            th.bits = pixel_availability(br, bg, bb, ba);
+            result.push_back(th);
         }
-    }
-
-    const pixel_availability& availability_map::max_threshold_bits()
-    {
-        return _max_threshold_bits;
+        return result;
     }
 }
