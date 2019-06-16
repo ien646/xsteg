@@ -7,6 +7,7 @@ Encoding modes:
     '-d':  Decode
     '-m':  Diff-map
     '-vd': Generate visual-data maps
+	'-gk': Generate thresholds key
 
 Threshold ('-t') specification:
     [0]: Visual data type
@@ -38,6 +39,7 @@ Threshold ('-t') specification:
 '-of': Output file-path (decoding)
 '-x' : Direct text-data input (encoding, not-recommended)
 '-df': Input data file (encoding)
+'-rk': Restore thresholds from key-string
 
 Command examples:
 
