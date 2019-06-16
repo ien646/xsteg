@@ -97,6 +97,7 @@ Encoding modes:\n\
     '-d':  Decode\n\
     '-m':  Diff-map\n\
     '-vd': Generate visual-data maps\n\
+    '-gk': Generate thresholds key\n\
 \n\n\
 Threshold ('-t') specification:\n\
     [0]: Visual data type\n\
@@ -128,6 +129,7 @@ Threshold ('-t') specification:\n\
 '-of': Output file-path (decoding)\n\
 '-x' : Direct text-data input (encoding, not-recommended)\n\
 '-df': Input data file (encoding)\n\
+'-rk': Restore thresholds from key-string\n\
 \n\n\
 Command examples:\n\
 \n\
