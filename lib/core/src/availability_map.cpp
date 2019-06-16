@@ -59,7 +59,8 @@ namespace xsteg
     {
         static unsigned int max_threads = std::thread::hardware_concurrency();
         if(!_modified) { return; }
-        
+        _modified = false;
+
         int th_i = 0;
         for(auto& thres : _thresholds)
         {
@@ -71,7 +72,7 @@ namespace xsteg
             const size_t report_threshold = std::max(pixel_count / 500, (size_t)5);
             size_t report_th_accum = 0;
 
-            std::mutex report_mex;
+            std::mutex report_mx;
 
             auto thread_segment = [&](size_t from, size_t to)
             {
@@ -96,12 +97,9 @@ namespace xsteg
                     }
                     if((report_accum++ > report_threshold) == 0)   
                     {
-                        if(report_mex.try_lock())
-                        {
-                            report_th_accum += report_accum;
-                            report_accum = 0;
-                            report_mex.unlock();
-                        }
+                        std::lock_guard lock_mx(report_mx);
+                        report_th_accum += report_accum;
+                        report_accum = 0;
                     }
                 }
             };
@@ -109,7 +107,7 @@ namespace xsteg
             size_t thread_segment_size = pixel_count / max_threads;
 
             std::vector<std::thread> threads;
-            for(size_t i = 0; i < max_threads - 1; ++i)
+            for(size_t i = 0; i < max_threads - 2; ++i)
             {
                 size_t from = (i * thread_segment_size);
                 size_t to = from + thread_segment_size;
@@ -117,6 +115,9 @@ namespace xsteg
                     std::thread(thread_segment, from, to)
                 );
             }
+            size_t last_from_idx = (max_threads - 1) * thread_segment_size;
+            size_t last_to_idx = last_from_idx + thread_segment_size + (pixel_count % max_threads) - 1;
+            threads.push_back(std::thread(thread_segment, last_from_idx, last_to_idx));
 
             bool end_report = false;
             auto report_thread = std::thread([&]()
