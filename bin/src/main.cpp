@@ -22,9 +22,28 @@ using namespace xsteg;
 // xsteg -m -t SATURATION UP 0.5 1210 -ii tt2.png -oi tt3.png
 // xsteg -vd -ii tt2.png
 
-void encode(main_args args)
+std::string generate_key(main_args& args)
+{
+    image img(1, 1);
+    availability_map av_map(&img);
+    for(auto& th : args.thresholds)
+    {
+        av_map.add_threshold(th.data_type, th.direction, th.value, th.bits);
+    }
+    return av_map.generate_key();
+}
+
+void restore_key(main_args& args)
+{
+    args.thresholds = availability_map::parse_key(args.restore_key);
+}
+
+void encode(main_args& args)
 {
     steganographer steg(args.input_img);
+
+    if(!args.restore_key.empty()) { restore_key(args); }
+
     for(auto& th : args.thresholds)
     {
         steg.add_threshold(th.data_type, th.direction, th.value, th.bits);
@@ -34,9 +53,12 @@ void encode(main_args args)
     steg.save_to_file(args.output_img);
 }
 
-void decode(main_args args)
+void decode(main_args& args)
 {
     steganographer steg(args.input_img);
+
+    if(!args.restore_key.empty()) { restore_key(args); }
+
     for(auto& th : args.thresholds)
     {
         steg.add_threshold(th.data_type, th.direction, th.value, th.bits);
@@ -56,14 +78,15 @@ void decode(main_args args)
     }
 }
 
-void diff_map(main_args args)
+void diff_map(main_args& args)
 {
     image img(args.input_img);
+    if(!args.restore_key.empty()) { restore_key(args); }
     image diff_map = generate_visual_data_diff_map(&img, args.thresholds[0].data_type, args.thresholds[0].value);
     diff_map.write_to_file(args.output_img);
 }
 
-void vdata_maps(main_args args)
+void vdata_maps(main_args& args)
 {
     image img(args.input_img);
 
@@ -108,13 +131,19 @@ int main(int argc, char** argv)
     {
         case encode_mode::NOT_SET:
         {
-            std::cerr << "Encoding mode not set!" << std::endl;
+            std::cerr << "Encoding mode not set! (-h for help)" << std::endl;
             return -1;
         }
         case encode_mode::ENCODE: { encode(margs); break; }
         case encode_mode::DECODE: { decode(margs); break; }
         case encode_mode::DIFF_MAP: { diff_map(margs); break; }
         case encode_mode::VDATA_MAPS: { vdata_maps(margs); break; }
+        case encode_mode::HELP: { std::cout << help_text << std::endl; }
+        case encode_mode::GENERATE_KEY:
+        { 
+            std::cout << std::endl << generate_key(margs) << std::endl;
+            break;
+        }
     }
     return 0;
 }

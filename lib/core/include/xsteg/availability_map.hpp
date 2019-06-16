@@ -75,5 +75,7 @@ namespace xsteg
         void restore_from_key(const std::string& key);
 
         const pixel_availability& max_threshold_bits();
+
+        static std::vector<availability_threshold> parse_key(const std::string& key);
     };
 }
