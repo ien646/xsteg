@@ -1,5 +1,6 @@
 
 
+
  # xsteg - Image Steganography Tool
 
 ### What is xsteg?
@@ -39,6 +40,16 @@ The input image data is truncated to the bits not used to store the data, whenev
 
 To avoid resetting pixel overrides, any character of the mask can be replaced by an underscore ('_'), which will prevent overriding previous threshold values for pixels that go over multiple thresholds.
 
+### What image formats are supported?
+For input image files (i.e. images onto which data will be encoded), supported formats are:
+- **jpeg** _(baseline & progressive)_
+- **png** _(1/2/4/8/16-bit-per-channel)_
+- **tga**
+- **bmp**
+- **psd** _(composited view only, no extra channels, 8/16 bit-per-channel)_
+- **gif**
+
+For output images, the only supported format is 4-channel png. Technically, any lossless 3~4 channel image could be used, as long as the alpha is ignored for 3-channel formats.
 
 ## Building
 
