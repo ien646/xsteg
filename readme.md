@@ -1,6 +1,6 @@
 
 
- ## xsteg - Image Steganography Tool
+ # xsteg - Image Steganography Tool
 
 ### What is xsteg?
 It's an image-based steganography tool.
@@ -39,6 +39,29 @@ The input image data is truncated to the bits not used to store the data, whenev
 
 To avoid resetting pixel overrides, any character of the mask can be replaced by an underscore ('_'), which will prevent overriding previous threshold values for pixels that go over multiple thresholds.
 
+
+## Building
+
+#### Requirements:
+
+- C++17 compatible compiler
+- A relatively recent version of CMake
+#### How to build:
+- **Windows/Linux/MacOS**: 
+Run any of the supplied *.bat build scripts. MacOS users should use the Linux build script.
+
+- **Other platforms**:
+Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
+	```
+	mkdir build
+	cd build
+	cmake .. -DCMAKE_BUILD_TYPE=Release
+	cmake --build . --config Release
+	```
+- **Tested compilers**:
+
+  - _MSVC 14.1X (Visual Studio 2017)_
+  - _GNU-GCC 8.3.0_
 
 ## Command-Line Tool Usage
 
