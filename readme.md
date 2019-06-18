@@ -48,7 +48,7 @@ To avoid resetting pixel overrides, any character of the mask can be replaced by
 - A relatively recent version of CMake
 #### How to build:
 - **Windows/Linux/MacOS**: 
-Run any of the supplied *.bat build scripts. MacOS users should use the Linux build script.
+Run any of the supplied *.bat(Windows) or *.sh(Linux/MacOS) release build scripts.
 
 - **Other platforms**:
 Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
