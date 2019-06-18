@@ -1,4 +1,5 @@
 
+
  ## xsteg - Image Steganography Tool
 
 ### What is xsteg?
@@ -78,10 +79,15 @@ To avoid resetting pixel overrides, any character of the mask can be replaced by
     [3]: Threshold value from 0.00 to 1.00
 ```
 `-ii`: Input image file-path
+
 `-oi`: Output image file-path (encoding, exclusively png format)
+
 `-of`: Output file-path (decoding)
+
 `-x` : Direct text-data input (encoding, not-recommended)
+
 `-df`: Input data file (encoding)
+
 `-rk`: Restore thresholds from key-string
 
 ### Command examples:
