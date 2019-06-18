@@ -15,7 +15,7 @@ namespace xsteg
     availability_map::availability_map(const image* imgptr)
     {
         _img = imgptr;
-        _map.resize(_img->pixel_count());
+        _map.resize(_img->pixel_count(), pixel_availability(0, 0, 0, 0));
     }
 
     void availability_map::add_threshold(
@@ -90,12 +90,16 @@ namespace xsteg
 
                     if(pxv >= thres.value)
                     {
-                        _map[i].r = thres.bits.r;
-                        _map[i].g = thres.bits.g;
-                        _map[i].b = thres.bits.b;
-                        _map[i].a = thres.bits.a;
+                        if(thres.bits.r >= 0)
+                            { _map[i].r = thres.bits.r; }
+                        if(thres.bits.g >= 0)
+                            { _map[i].g = thres.bits.g; }
+                        if(thres.bits.b >= 0)
+                            { _map[i].b = thres.bits.b; }
+                        if(thres.bits.a >= 0)
+                            { _map[i].a = thres.bits.a; }
                     }
-                    if((report_accum++ > report_threshold) == 0)   
+                    if((report_accum++ > report_threshold) == 0)
                     {
                         std::lock_guard lock_mx(report_mx);
                         report_th_accum += report_accum;
@@ -167,10 +171,10 @@ namespace xsteg
     std::string bits_ov_to_string(pixel_availability& bits)
     {
         std::stringstream ss;
-        ss << bits.r;
-        ss << bits.g;
-        ss << bits.b;
-        ss << bits.a;
+        if(bits.r == -1) { ss << '_'; } else { ss << bits.r; }
+        if(bits.g == -1) { ss << '_'; } else { ss << bits.g; }
+        if(bits.b == -1) { ss << '_'; } else { ss << bits.b; }
+        if(bits.a == -1) { ss << '_'; } else { ss << bits.a; }
         return ss.str();
     }
 
@@ -266,10 +270,13 @@ namespace xsteg
                 : threshold_direction::DOWN;
 
             if(type[3] != BITS_OV_DESIGNATOR) { exit(-2); }
-            uint8_t br = std::stoi(std::string(1, type[4]));
-            uint8_t bg = std::stoi(std::string(1, type[5]));
-            uint8_t bb = std::stoi(std::string(1, type[6]));
-            uint8_t ba = std::stoi(std::string(1, type[7]));
+
+            int br, bg, bb, ba;
+            if(type[4] == '_'){ br = -1; } else { br = std::stoi(std::string(1, type[4])); }
+            if(type[5] == '_'){ bg = -1; } else { bg = std::stoi(std::string(1, type[5])); }
+            if(type[6] == '_'){ bb = -1; } else { bb = std::stoi(std::string(1, type[6])); }
+            if(type[7] == '_'){ ba = -1; } else { ba = std::stoi(std::string(1, type[7])); }
+
             if(type[8] != VALUE_DESIGNATOR) { exit(-3); }
             std::string fstr = type.substr(9);
             float val = std::stof(fstr);
