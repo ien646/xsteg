@@ -82,24 +82,34 @@ main_args parse_main_args(int argc, char** argv)
         else if(arg == "-rk")
         {
             result.restore_key = next_arg();
-        }     
+        }
+        else if(arg == "-nomt")
+        {
+            runtime_settings::multithreaded = false;
+        }
     }
     return result;
 }
 
 const std::string help_text = "\
-|==================================================|\n\
-|---------------------- XSTEG ---------------------|\n\
-|==================================================|\n\
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\
+ xsteg - Image Steganography Tool\n\
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+\n\
 \n\
-Encoding modes:\n\
+\n\
+Command-Line Tool Usage\n\
+========================n\
+\n\
+\n\
+Encoding mode arguments (pick one)\n\
+----------------------------------\n\
     '-e':  Encode\n\
     '-d':  Decode\n\
     '-m':  Diff-map\n\
     '-vd': Generate visual-data maps\n\
     '-gk': Generate thresholds key\n\
-\n\n\
-Threshold ('-t') specification:\n\
+\n\
+Threshold '-t' specification (-t [0](visual_data) [1](direction) [2](orb_mask) [3](value)):\n\
     [0]: Visual data type\n\
         - Available types:\n\
          > COLOR_RED\n\
@@ -123,25 +133,31 @@ Threshold ('-t') specification:\n\
             > 0 bits on alpha channel\n\
 \n\
     [3]: Threshold value from 0.00 to 1.00\n\
-\n\n\
+\n\
+Other arguments\n\
+---------------\n\
+\n\
 '-ii': Input image file-path\n\
 '-oi': Output image file-path (encoding, exclusively png format)\n\
 '-of': Output file-path (decoding)\n\
 '-x' : Direct text-data input (encoding, not-recommended)\n\
 '-df': Input data file (encoding)\n\
 '-rk': Restore thresholds from key-string\n\
-\n\n\
-Command examples:\n\
+'-v' : Verbose mode\n\
+'-nomt': Disable multithreading\n\
+\n\
+Command examples\n\
+----------------\n\
 \n\
 - Encode a text file, using pixels with color saturation higher than 50% (0.5), 1 bit per color channel.\n\
-    xsteg -e -t SATURATION UP 0.5 1110 -ii image.jpg -oi image.encoded.png -df text.txt\n\
+    xsteg -e -t SATURATION UP 1110 0.5 -ii image.jpg -oi image.encoded.png -df text.txt\n\
 \n\
-- Decode contents of an encoded image:\n\
-    xsteg -d -t SATURATION UP 0.5 1110 -ii image.encoded.png -of text.decoded.txt\n\
+- Decode contents of an image with encoded data within:\n\
+    xsteg -d -t SATURATION UP 1110 0.5 -ii image.encoded.png -of text.decoded.txt\n\
 \n\
 - Generate visual data maps for an image:\n\
     xsteg -vd -ii image.jpg\n\
 \n\
 - Generate 50% luminance diff-map for an image:\n\
-    xsteg -m -ii image.jpg -t LUMINANCE UP 0000 0.5 -oi image.luminance.50.png\n\
+    xsteg -m -ii image.jpg -t LUMINANCE UP 0000 0.5 -oi image.luminance.50.png\
 ";

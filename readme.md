@@ -1,10 +1,12 @@
 
 
 
+
  # xsteg - Image Steganography Tool
 
 ### What is xsteg?
 It's an image-based steganography tool.
+https://en.wikipedia.org/wiki/Steganography
 
 ### What can I do with it?
 
@@ -49,7 +51,7 @@ For input image files (i.e. images onto which data will be encoded), supported f
 - **psd** _(composited view only, no extra channels, 8/16 bit-per-channel)_
 - **gif**
 
-For output images, the only supported format is 4-channel png. Technically, any lossless 3~4 channel image could be used, as long as the alpha is ignored for 3-channel formats.
+**For output images, the only supported format is 4-channel png**. Technically, any lossless 3~4 channel image format could be used, as long as the alpha is ignored for 3-channel formats.
 
 ## Building
 
@@ -76,7 +78,7 @@ Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
 
 ## Command-Line Tool Usage
 
-### Encoding modes:
+### Encoding modes (pick one):
     '-e':  Encode
     '-d':  Decode
     '-m':  Diff-map
@@ -111,6 +113,9 @@ Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
             > 0 bits on alpha channel
 
     [3]: Threshold value from 0.00 to 1.00
+
+### Arguments:
+
 ```
 `-ii`: Input image file-path
 
@@ -123,6 +128,10 @@ Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
 `-df`: Input data file (encoding)
 
 `-rk`: Restore thresholds from key-string
+
+`-v` : Verbose mode
+
+`-nomt`: Disable multithreading
 
 ### Command examples:
 

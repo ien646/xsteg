@@ -5,6 +5,7 @@ set(XSTEG_CORE_SOURCES
     src/image.cpp   
     src/runtime_settings.cpp
     src/steganographer.cpp
+    src/synced_print.cpp
     src/visual_data.cpp)
     
 find_package(Threads)

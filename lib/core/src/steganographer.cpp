@@ -114,7 +114,7 @@ namespace xsteg
                 << available_space 
                 << "]b for the given destination and thresholds."
                 << std::endl;
-            exit(-1);
+            exit(-77);
         }
 
         bit_view bits(inter_data.data(), bit_len);
