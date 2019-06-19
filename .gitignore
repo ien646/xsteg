@@ -2,3 +2,4 @@
 .vscode/ipch/
 build_debug_win64/
 build_release_win64/
+build_release_win32/

@@ -44,13 +44,13 @@ namespace xsteg
 
     std::vector<uint8_t> get_bytes_for_size(size_t sz)
     {
-        static_assert(sizeof(size_t) == 8, "Size of size_t is not 8 bytes. Platform not supported.");
-
+        uint64_t sz64 = static_cast<uint64_t>(sz);
+        
         std::vector<uint8_t> result;
         result.resize(8);        
         for(size_t i = 0; i < 8; ++i)
         {
-            uint8_t byte = static_cast<uint8_t>(sz >> ((7 - i) * 8));
+            uint8_t byte = static_cast<uint8_t>(sz64 >> ((7 - i) * 8));
             result[i] = byte;
         }
         return result;
