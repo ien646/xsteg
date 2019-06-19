@@ -29,7 +29,7 @@ const map<string, threshold_direction> threshold_direction_name_map =
 
 main_args parse_main_args(int argc, char** argv)
 {
-    size_t current_arg = 1;
+    int current_arg = 1;
     main_args result;
     auto next_arg = [&]() -> std::string { return std::string(argv[current_arg++]); };
 
