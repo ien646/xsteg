@@ -1,6 +1,7 @@
 #include <xsteg/availability_map.hpp>
 
 #include <xsteg/runtime_settings.hpp>
+#include <xsteg/synced_print.hpp>
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -57,92 +58,112 @@ namespace xsteg
 
     void availability_map::apply_thresholds()
     {
-        static unsigned int max_threads = std::thread::hardware_concurrency();
         if(!_modified) { return; }
         _modified = false;
 
-        int th_i = 0;
-        for(auto& thres : _thresholds)
+        static const unsigned int max_threads = std::thread::hardware_concurrency();
+        if(runtime_settings::multithreaded && (max_threads > 1))
         {
-            ++th_i;
-            std::cout << "Applying threshold [" << th_i << "/" 
-                << _thresholds.size() << "]" << std::endl;
+            apply_thresholds_mt(max_threads);
+        }
+        else
+        {
+            apply_thresholds_st();
+        }
+    }
 
+    void print_apply_thres_sgmt_prog(size_t th_idx, size_t px_idx, size_t from_px, size_t to_px)
+    {
+        int64_t current_px_seg_idx = (to_px - from_px) - (to_px - px_idx);
+        std::stringstream sstr;
+        sstr << "THRES[" << th_idx << "] "
+             << "SEG["<< from_px << " ~ " << to_px <<"] "
+             << "PX[" << current_px_seg_idx << "/" << (to_px - from_px) << "]";
+        synced_print(sstr.str(), true);
+    }
+
+    void availability_map::apply_thresholds_segment(
+        size_t from_px, 
+        size_t to_px)
+    {
+        const size_t total_px = _thresholds.size() * (to_px - from_px);
+        for(size_t thi = 0; thi < _thresholds.size(); ++thi)
+        {
+            auto& thres = _thresholds[thi];
             const size_t pixel_count =_img->pixel_count();
-            const size_t report_threshold = std::max(pixel_count / 500, (size_t)5);
-            size_t report_th_accum = 0;
-
-            std::mutex report_mx;
-
-            auto thread_segment = [&](size_t from, size_t to)
+            const size_t report_threshold_px = 400000 + std::abs(rand() % 100000); // report progress every x pixels
+            for(size_t pxi = from_px; pxi < to_px; ++pxi)
             {
-                size_t report_accum = 0;
-                for(size_t i = from; i <= to; ++i)
-                {
-                    float pxv = get_visual_data(
-                        _img->cpixel_at_idx(i), 
-                        thres.data_type, 
-                        thres.bits
-                    );
-                    bool cond = (thres.direction == threshold_direction::UP)
-                                ? pxv >= thres.value
-                                : pxv <= thres.value;
-
-                    if(pxv >= thres.value)
-                    {
-                        if(thres.bits.r >= 0)
-                            { _map[i].r = thres.bits.r; }
-                        if(thres.bits.g >= 0)
-                            { _map[i].g = thres.bits.g; }
-                        if(thres.bits.b >= 0)
-                            { _map[i].b = thres.bits.b; }
-                        if(thres.bits.a >= 0)
-                            { _map[i].a = thres.bits.a; }
-                    }
-                    if((report_accum++ > report_threshold) == 0)
-                    {
-                        std::lock_guard lock_mx(report_mx);
-                        report_th_accum += report_accum;
-                        report_accum = 0;
-                    }
-                }
-            };
-
-            size_t thread_segment_size = pixel_count / max_threads;
-
-            std::vector<std::thread> threads;
-            for(size_t i = 0; i < max_threads - 2; ++i)
-            {
-                size_t from = (i * thread_segment_size);
-                size_t to = from + thread_segment_size;
-                threads.push_back(
-                    std::thread(thread_segment, from, to)
+                float pxv = get_visual_data(
+                    _img->cpixel_at_idx(pxi), 
+                    thres.data_type, 
+                    thres.bits
                 );
-            }
-            size_t last_from_idx = (max_threads - 1) * thread_segment_size;
-            size_t last_to_idx = last_from_idx + thread_segment_size + (pixel_count % max_threads) - 1;
-            threads.push_back(std::thread(thread_segment, last_from_idx, last_to_idx));
+                bool cond = (thres.direction == threshold_direction::UP)
+                            ? pxv >= thres.value
+                            : pxv <= thres.value;
 
-            bool end_report = false;
-            auto report_thread = std::thread([&]()
-            {
+                if(pxv >= thres.value)
+                {
+                    if(thres.bits.r >= 0)
+                        { _map[pxi].r = thres.bits.r; }
+                    if(thres.bits.g >= 0)
+                        { _map[pxi].g = thres.bits.g; }
+                    if(thres.bits.b >= 0)
+                        { _map[pxi].b = thres.bits.b; }
+                    if(thres.bits.a >= 0)
+                        { _map[pxi].a = thres.bits.a; }
+                }
                 if(runtime_settings::verbose)
                 {
-                    while(!end_report)
+                    size_t current_px_seg_idx = (to_px - pxi) - from_px;
+                    if(current_px_seg_idx % report_threshold_px == 0)
                     {
-                        std::cout << "(pixels)[" << report_th_accum << "/" << pixel_count << "]\r";
-                        std::this_thread::sleep_for(std::chrono::milliseconds(20));
+                        print_apply_thres_sgmt_prog(thi, pxi, from_px, to_px);
                     }
                 }
-            });
+            }
+            if(runtime_settings::verbose)
+            {
+                print_apply_thres_sgmt_prog(thi, to_px, from_px, to_px);
+            }
+        }
+    }
 
-            for(auto& th : threads) { th.join(); }
-            end_report = true;
-            report_thread.join();
-            
-            std::cout << "> (pixels)[" << _img->pixel_count() << "/" 
-                << _img->pixel_count() << "]\r";
-            std::cout << std::endl;
+    void availability_map::apply_thresholds_st()
+    {
+        apply_thresholds_segment(0, _img->pixel_count() - 1);
+    }
+
+    void availability_map::apply_thresholds_mt(unsigned int thread_count)
+    {
+        const size_t pixel_count = _img->pixel_count();
+        const size_t thread_segment_size = pixel_count / thread_count;
+
+        std::vector<std::thread> threads;
+        for(auto i = 0u; i < thread_count - 1; ++i)
+        {
+            threads.push_back(
+                std::thread(
+                    &availability_map::apply_thresholds_segment,
+                    this,
+                    i * thread_segment_size,
+                    ((i + 1) * thread_segment_size) - 1
+                )
+            );
+        }
+        threads.push_back(
+            std::thread(
+                &availability_map::apply_thresholds_segment,
+                this,
+                (thread_count - 1) * thread_segment_size,
+                thread_count * thread_segment_size + (pixel_count % thread_segment_size)
+            )
+        );
+
+        for(auto& th : threads)
+        {
+            th.join();
         }
     }
 

@@ -77,5 +77,10 @@ namespace xsteg
         const pixel_availability& max_threshold_bits();
 
         static std::vector<availability_threshold> parse_key(const std::string& key);
+
+    private:
+        void apply_thresholds_st();
+        void apply_thresholds_mt(unsigned int thread_count);
+        void apply_thresholds_segment(size_t from_px, size_t to_px);
     };
 }
