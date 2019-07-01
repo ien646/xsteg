@@ -103,7 +103,7 @@ namespace xsteg
                             ? pxv >= thres.value
                             : pxv <= thres.value;
 
-                if(pxv >= thres.value)
+                if(cond)
                 {
                     if(thres.bits.r >= 0)
                         { _map[pxi].r = thres.bits.r; }
