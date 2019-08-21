@@ -85,6 +85,11 @@ Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
     '-vd': Generate visual-data maps
     '-gk': Generate thresholds key
 
+### Resizing modes (pick one):
+    '-ra': Generate resized image (absolute pixel dimensions)
+    '-rp': Generate resized image (proportional percentages)
+    Both commands require two aditional arguments for specifiying width and height.
+
 ### Threshold '-t' specification 
 
 `(-t [0](visual_data)[1](direction)[2](orb_mask)[3](value))`
@@ -117,11 +122,13 @@ Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
 ### Arguments:
 
 ```
-`-ii`: Input image file-path
+`-ii`: Input image path
 
-`-oi`: Output image file-path (encoding, exclusively png format)
+`-oi`: Output image path (encoding, exclusively png format)
 
-`-of`: Output file-path (decoding)
+`-if`: Input file path (key restore)
+
+`-of`: Output path (decoding)
 
 `-x` : Direct text-data input (encoding, not-recommended)
 
@@ -135,12 +142,12 @@ Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
 
 ### Command examples:
 
-_Encode a text file, using pixels with color saturation higher than 50% (0.5), 1 bit per color channel._
+_Encode a text file, using pixels with color saturation higher than 50% (0.5), using 1 bit per color channel, leaving the alpha channel untouched._
 ```
 xsteg -e -t SATURATION UP 1110 0.5 -ii image.jpg -oi image.encoded.png -df text.txt
 ```
 
-_Decode contents of an image with encoded data within:_
+_Decode contents of an image with encoded data within, using the last example's threshold specification:_
 ```
 xsteg -d -t SATURATION UP 1110 0.5 -ii image.encoded.png -of text.decoded.txt
 ```
@@ -155,3 +162,40 @@ _Generate 50% luminance diff-map for an image:_
 xsteg -m -ii image.jpg -t LUMINANCE UP 0000 0.5 -oi image.luminance.50.png
 ```
 
+_Generate a encoding/deconding key from a list of thresholds (-gk):_
+```
+xsteg.exe -gk 
+    -t SATURATION UP 1110 0.344
+    -t COLOR_RED UP 1000 0.5
+    -t COLOR_GREEN UP 0100 0.5
+    -t COLOR_BLUE UP 0010 0.5
+```
+```
+output: &S>A*1110+0.344&0>A*1000+0.5&1>A*0100+0.5&2>A*0010+0.5
+```
+
+_Generate a encoding/deconding key from a list of thresholds and save it to a file (-gk):_
+```
+xsteg.exe -gk
+    -t SATURATION UP 1110 0.344
+    -t COLOR_RED UP 1000 0.5
+    -t COLOR_GREEN UP 0100 0.5
+    -t COLOR_BLUE UP 0010 0.5
+    -of 'encodign_key.txt'
+```
+
+_Encode a data file into an image, using the previously generated encoding key (-rk):_
+```
+xsteg -e -ii image.jpg -oi image_encoded.png -df data.txt 
+    -rk '&S>A*1110+0.344&0>A*1000+0.5&1>A*0100+0.5&2>A*0010+0.5'
+```
+
+_Generate resized image, in absolute pixel dimensions:_
+```
+xsteg -ra 800 600 -ii image.jpg -oi image_resized.png
+```
+
+_Generate resized image, in proportional percentage dimensions:_
+```
+xsteg -rp 65.5 35.25 -ii image.jpg -oi image_resized.png
+```

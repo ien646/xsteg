@@ -8,6 +8,7 @@
 
 #include "stb_image.h"
 #include "stb_image_write.h"
+#include "stb_image_resize.h"
 
 namespace xsteg
 {
@@ -63,6 +64,30 @@ namespace xsteg
         assert(result._loaded_stbi == false);
         std::memcpy(result._data, this->_data, pixel_count() * 4);
         return result;
+    }
+
+    image image::create_resized_copy_absolute(int px_width, int px_height)
+    {
+        image result(px_width, px_height);
+        stbir_resize_uint8(
+            _data, 
+            _width, 
+            _height, 
+            0, 
+            result.data(), 
+            result.width(), 
+            result.height(), 
+            0,
+            4 /* RGBA */
+        );
+        return result;
+    }
+
+    image image::create_resized_copy_proportional(float percentage_w, float percentage_h)
+    {
+        int pxw = static_cast<int>(_width * (percentage_h / 100));
+        int pxh = static_cast<int>(_height * (percentage_w / 100));
+        return create_resized_copy_absolute(pxw, pxh);
     }
 
     void image::read_from_file(const std::string& fname)

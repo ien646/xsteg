@@ -13,6 +13,8 @@ enum class encode_mode
     DIFF_MAP,
     VDATA_MAPS,
     GENERATE_KEY,
+    RESIZE_ABSOLUTE,
+    RESIZE_PROPORTIONAL,
     HELP
 };
 
@@ -24,8 +26,10 @@ struct main_args
     std::vector<xsteg::availability_threshold> thresholds;
     std::vector<uint8_t> data;
     bool output_std = false;
+    std::string input_file;
     std::string output_file;
     std::string restore_key;
+    float resize_w = 0, resize_h = 0;
 };
 
 extern const std::map<std::string, xsteg::visual_data_type> visual_data_type_name_map;

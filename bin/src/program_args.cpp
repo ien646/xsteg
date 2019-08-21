@@ -43,11 +43,23 @@ main_args parse_main_args(int argc, char** argv)
         else if(arg == "-m")    { result.mode = encode_mode::DIFF_MAP; }
         else if(arg == "-vd")   { result.mode = encode_mode::VDATA_MAPS; }
         else if(arg == "-h")    { result.mode = encode_mode::HELP; }
-        else if(arg == "-gk")   { result.mode = encode_mode::GENERATE_KEY; }        
+        else if(arg == "-gk")   { result.mode = encode_mode::GENERATE_KEY; }
         else if(arg == "-o")    { result.output_std = true; }
         else if(arg == "-of")   { result.output_file = next_arg(); }
         else if(arg == "-x")    { result.data = str_to_datavec(next_arg()); }
         else if(arg == "-v")    { runtime_settings::verbose = true; }
+        else if(arg == "-ra")
+        { 
+            result.mode = encode_mode::RESIZE_ABSOLUTE;
+            result.resize_w = std::stof(next_arg());
+            result.resize_h = std::stof(next_arg());
+        }
+        else if(arg == "-rp")
+        { 
+            result.mode = encode_mode::RESIZE_PROPORTIONAL; 
+            result.resize_w = std::stof(next_arg());
+            result.resize_h = std::stof(next_arg());
+        }
         else if(arg == "-t")
         {
             std::string type = next_arg();
@@ -109,6 +121,13 @@ Encoding mode arguments (pick one)\n\
     '-vd': Generate visual-data maps\n\
     '-gk': Generate thresholds key\n\
 \n\
+Resize mode arguments\n\
+----------------------\n\
+    '-ra *w *h': Generate resized image (absolute pixel dimensions)\n\
+    '-rp *w *h': Generate resized image (proportional percentages)\n\
+    *w = Resized image width, in pixels or percentage (-ra, -rp, respectively)\n\
+    *w = Resized image height, in pixels or percentage (-ra, -rp, respectively)\n\
+\n\
 Threshold '-t' specification (-t [0](visual_data) [1](direction) [2](orb_mask) [3](value)):\n\
     [0]: Visual data type\n\
         - Available types:\n\
@@ -159,5 +178,33 @@ Command examples\n\
     xsteg -vd -ii image.jpg\n\
 \n\
 - Generate 50% luminance diff-map for an image:\n\
-    xsteg -m -ii image.jpg -t LUMINANCE UP 0000 0.5 -oi image.luminance.50.png\
+    xsteg -m -ii image.jpg -t LUMINANCE UP 0000 0.5 -oi image.luminance.50.png\n\
+\n\
+- Generate a encoding/deconding key from a list of thresholds:\n\
+xsteg.exe -gk\n\
+    -t SATURATION UP 1110 0.344\n\
+    -t COLOR_RED UP 1000 0.5\n\
+    -t COLOR_GREEN UP 0100 0.5\n\
+    -t COLOR_BLUE UP 0010 0.5\n\
+---------------------------------------------------------------\n\
+output: &S>A*1110+0.344&0>A*1000+0.5&1>A*0100+0.5&2>A*0010+0.5\n\
+---------------------------------------------------------------\n\
+\n\
+- Generate a encoding/deconding key from a list of thresholds and save it to a file:\n\
+xsteg.exe -gk \n\
+    -t SATURATION UP 1110 0.344\n\
+    -t COLOR_RED UP 1000 0.5\n\
+    -t COLOR_GREEN UP 0100 0.5\n\
+    -t COLOR_BLUE UP 0010 0.5\n\
+    -of 'encodign_key.txt'\n\
+\n\
+- Encode a data file into an image, using the previously generated encoding key:\n\
+xsteg -e -ii image.jpg -oi image_encoded.png -df data.txt\n\
+    -rk '&S>A*1110+0.344&0>A*1000+0.5&1>A*0100+0.5&2>A*0010+0.5'\n\
+\n\
+- Generate resized image, in absolute pixel dimensions:\n\
+xsteg -ra 800 600 -ii image.jpg -oi image_resized.png\n\
+\n\
+- Generate resized image, in proportional percentage dimensions:\n\
+xsteg -rp 65.5 35.25 -ii image.jpg -oi image_resized.png\
 ";

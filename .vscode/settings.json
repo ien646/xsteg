@@ -1,7 +1,7 @@
 {
     "files.associations": {
-        "*.cpp": "cpp",
         "*.inl": "cpp",
+        "*.cpp": "cpp",
         "xlocale": "cpp",
         "xstring": "cpp",
         "xutility": "cpp",
@@ -57,6 +57,7 @@
         "thread": "cpp",
         "unordered_map": "cpp",
         "xhash": "cpp",
-        "mutex": "cpp"
+        "mutex": "cpp",
+        "cfloat": "cpp"
     }
 }

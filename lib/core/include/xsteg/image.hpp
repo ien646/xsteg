@@ -30,6 +30,9 @@ namespace xsteg
 
         image create_copy();
 
+        image create_resized_copy_absolute(int px_width, int px_height);
+        image create_resized_copy_proportional(float percentage_w, float percentage_h);
+
         void read_from_file(const std::string& fname);
         void write_to_file(const std::string& fname);
 

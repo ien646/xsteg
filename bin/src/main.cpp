@@ -15,15 +15,82 @@ using namespace std::chrono_literals;
 using hclock = std::chrono::high_resolution_clock;
 using namespace xsteg;
 
-// xsteg -e -t SATURATION UP 0.5 1210 -ii tt.png -oi tt2.png -x "Hello my friend!"
-// xsteg -e -t SATURATION UP 0.5 1210 -ii tt.png -oi tt2.png -df hello.txt
-// xsteg -d -t SATURATION UP 0.5 1210 -ii tt2.png -o
-// xsteg -d -t SATURATION UP 0.5 1210 -ii tt2.png -of hello2.txt
-// xsteg -m -t SATURATION UP 0.5 1210 -ii tt2.png -oi tt3.png
-// xsteg -vd -ii tt2.png
+void require_thresholds(main_args& args)
+{
+    if(args.thresholds.empty())
+    {
+        std::cout << "No threshold(s) specified, aborting..." << std::endl;
+        exit(-1);
+    }
+}
+
+void require_thresholds_or_rkey(main_args& args)
+{
+    if(args.thresholds.empty() && args.restore_key.empty())
+    {
+        std::cout << "No threshold(s) specified, aborting..." << std::endl;
+        exit(-1);
+    }
+}
+
+void require_rkey(main_args& args)
+{
+    if(args.restore_key.empty())
+    {
+        std::cout << "No key specified, aborting..." << std::endl;
+        exit(-1);
+    }
+}
+
+void require_input_image(main_args& args)
+{
+    if(args.input_img.empty())
+    {
+        std::cout << "No input image specified, aborting..." << std::endl;
+        exit(-1);
+    }
+}
+
+void require_output_image(main_args& args)
+{
+    if(args.output_img.empty())
+    {
+        std::cout << "No output image specified, aborting..." << std::endl;
+        exit(-1);
+    }
+}
+
+void require_output_file(main_args& args)
+{
+    if(args.output_img.empty())
+    {
+        std::cout << "No output file specified, aborting..." << std::endl;
+        exit(-1);
+    }
+}
+
+void require_data(main_args& args)
+{
+    if(args.data.empty())
+    {
+        std::cout << "No data to encode found, aborting..." << std::endl;
+        exit(-1);
+    }
+}
+
+void require_resize_values(main_args args)
+{
+    if(args.resize_w <= 0 || args.resize_h <= 0)
+    {
+        std::cout << "Invalid resize dimensions, aborting..." << std::endl;
+        exit(-1);
+    }
+}
 
 std::string generate_key(main_args& args)
 {
+    require_thresholds(args);
+
     image img(1, 1);
     availability_map av_map(&img);
     for(auto& th : args.thresholds)
@@ -35,11 +102,17 @@ std::string generate_key(main_args& args)
 
 void restore_key(main_args& args)
 {
+    require_rkey(args);
     args.thresholds = availability_map::parse_key(args.restore_key);
 }
 
 void encode(main_args& args)
 {
+    require_thresholds_or_rkey(args);
+    require_input_image(args);
+    require_output_image(args);
+    require_data(args);
+
     steganographer steg(args.input_img);
 
     if(!args.restore_key.empty()) { restore_key(args); }
@@ -55,6 +128,13 @@ void encode(main_args& args)
 
 void decode(main_args& args)
 {
+    require_thresholds_or_rkey(args);
+    require_input_image(args);
+    if(!args.output_std)
+    {
+        require_output_file(args);
+    }
+
     steganographer steg(args.input_img);
 
     if(!args.restore_key.empty()) { restore_key(args); }
@@ -80,14 +160,21 @@ void decode(main_args& args)
 
 void diff_map(main_args& args)
 {
+    require_thresholds_or_rkey(args);
+    require_input_image(args);
+    require_output_image(args);
+
     image img(args.input_img);
     if(!args.restore_key.empty()) { restore_key(args); }
+
     image diff_map = generate_visual_data_diff_image(&img, args.thresholds[0].data_type, args.thresholds[0].value);
     diff_map.write_to_file(args.output_img);
 }
 
 void vdata_maps(main_args& args)
 {
+    require_input_image(args);
+
     image img(args.input_img);
 
     auto log_gen = [](const std::string& type) -> void
@@ -138,6 +225,51 @@ void vdata_maps(main_args& args)
     std::cout << "Done!" << std::endl;
 }
 
+void gen_key(main_args args)
+{
+    require_thresholds(args);
+
+    std::string key = generate_key(args);
+    if(!args.output_file.empty())
+    {
+        std::ofstream ofs(args.output_file);
+        if(ofs)
+        {
+            ofs << key;
+            ofs.close();
+        }
+    }
+    else
+    {
+        std::cout << std::endl << key << std::endl;
+    }
+}
+
+void resize_abs(main_args args)
+{
+    require_input_image(args);
+    require_output_image(args);
+    require_resize_values(args);
+
+    image img(args.input_img);
+    image resized = img.create_resized_copy_absolute(
+        static_cast<int>(args.resize_w),
+        static_cast<int>(args.resize_h)
+    );
+    resized.write_to_file(args.output_img);
+}
+
+void resize_pro(main_args args)
+{
+    require_input_image(args);
+    require_output_image(args);
+    require_resize_values(args);
+
+    image img(args.input_img);
+    image resized = img.create_resized_copy_proportional(args.resize_w, args.resize_h);
+    resized.write_to_file(args.output_img);
+}
+
 int main(int argc, char** argv)
 {
     main_args margs = parse_main_args(argc, argv);
@@ -152,12 +284,10 @@ int main(int argc, char** argv)
         case encode_mode::DECODE: { decode(margs); break; }
         case encode_mode::DIFF_MAP: { diff_map(margs); break; }
         case encode_mode::VDATA_MAPS: { vdata_maps(margs); break; }
-        case encode_mode::HELP: { std::cout << help_text << std::endl; }
-        case encode_mode::GENERATE_KEY:
-        { 
-            std::cout << std::endl << generate_key(margs) << std::endl;
-            break;
-        }
+        case encode_mode::HELP: { std::cout << help_text << std::endl; break; }
+        case encode_mode::GENERATE_KEY:{ gen_key(margs); break; }
+        case encode_mode::RESIZE_ABSOLUTE: { resize_abs(margs); break; }
+        case encode_mode::RESIZE_PROPORTIONAL: { resize_pro(margs); break; }
     }
     return 0;
 }
