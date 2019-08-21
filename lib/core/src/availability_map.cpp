@@ -83,8 +83,9 @@ namespace xsteg
     }
 
     void availability_map::apply_thresholds_segment(
-        size_t from_px, 
-        size_t to_px)
+        size_t from_px,
+        size_t to_px,
+        const _vdata_map_map_t& vdata_maps)
     {
         const size_t total_px = _thresholds.size() * (to_px - from_px);
         for(size_t thi = 0; thi < _thresholds.size(); ++thi)
@@ -92,13 +93,10 @@ namespace xsteg
             auto& thres = _thresholds[thi];
             const size_t pixel_count =_img->pixel_count();
             const size_t report_threshold_px = 400000 + std::abs(rand() % 100000); // report progress every x pixels
+            const std::vector<float>& vdata = vdata_maps.at(thres.data_type);
             for(size_t pxi = from_px; pxi < to_px; ++pxi)
             {
-                float pxv = get_visual_data(
-                    _img->cpixel_at_idx(pxi), 
-                    thres.data_type, 
-                    thres.bits
-                );
+                float pxv = vdata[pxi];
                 bool cond = (thres.direction == threshold_direction::UP)
                             ? pxv >= thres.value
                             : pxv <= thres.value;
@@ -132,11 +130,42 @@ namespace xsteg
 
     void availability_map::apply_thresholds_st()
     {
-        apply_thresholds_segment(0, _img->pixel_count() - 1);
+        _vdata_map_map_t vdata_maps;
+        for(auto& thres : _thresholds)
+        {
+            if(!vdata_maps.count(thres.data_type))
+            {
+                std::vector<float> vdata_map = 
+                    get_visual_data_map(
+                        _img, 
+                        thres.data_type, 
+                        thres.bits
+                    );
+                
+                vdata_maps.emplace(thres.data_type, std::move(vdata_map));
+            }
+        }
+        apply_thresholds_segment(0, _img->pixel_count() - 1, vdata_maps);
     }
 
     void availability_map::apply_thresholds_mt(unsigned int thread_count)
     {
+        _vdata_map_map_t vdata_maps;
+        for(auto& thres : _thresholds)
+        {
+            if(!vdata_maps.count(thres.data_type))
+            {
+                std::vector<float> vdata_map = 
+                    get_visual_data_map(
+                        _img, 
+                        thres.data_type, 
+                        thres.bits
+                    );
+                
+                vdata_maps.emplace(thres.data_type, std::move(vdata_map));
+            }
+        }
+
         const size_t pixel_count = _img->pixel_count();
         const size_t thread_segment_size = pixel_count / thread_count;
 
@@ -148,7 +177,8 @@ namespace xsteg
                     &availability_map::apply_thresholds_segment,
                     this,
                     i * thread_segment_size,
-                    ((i + 1) * thread_segment_size) - 1
+                    ((i + 1) * thread_segment_size) - 1,
+                    vdata_maps
                 )
             );
         }
@@ -157,7 +187,8 @@ namespace xsteg
                 &availability_map::apply_thresholds_segment,
                 this,
                 (thread_count - 1) * thread_segment_size,
-                thread_count * thread_segment_size + (pixel_count % thread_segment_size)
+                thread_count * thread_segment_size + (pixel_count % thread_segment_size),
+                vdata_maps
             )
         );
 

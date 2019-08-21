@@ -2,6 +2,7 @@
 
 #include <xsteg/image.hpp>
 #include <xsteg/visual_data.hpp>
+#include <xsteg/pixel_availability.hpp>
 
 #include <cinttypes>
 #include <map>
@@ -14,28 +15,6 @@ namespace xsteg
         UP,
         DOWN
     };    
-    
-    struct pixel_availability
-    {
-        int r = 0;
-        int g = 0;
-        int b = 0;
-        int a = 0;
-
-        constexpr pixel_availability() noexcept = default;
-        constexpr pixel_availability(int rv, int gv, int bv, int av) noexcept
-        {
-            r = rv;
-            g = gv;
-            b = bv;
-            a = av;
-        }
-
-        constexpr bool is_zero() const
-        {
-            return r == 0 && g == 0 && b == 0 && a == 0;
-        }
-    };
 
     struct availability_threshold
     {
@@ -79,8 +58,10 @@ namespace xsteg
         static std::vector<availability_threshold> parse_key(const std::string& key);
 
     private:
+        typedef std::map<visual_data_type, std::vector<float>> _vdata_map_map_t;
+
         void apply_thresholds_st();
         void apply_thresholds_mt(unsigned int thread_count);
-        void apply_thresholds_segment(size_t from_px, size_t to_px);
+        void apply_thresholds_segment(size_t from_px, size_t to_px, const _vdata_map_map_t& vdata_maps);
     };
 }

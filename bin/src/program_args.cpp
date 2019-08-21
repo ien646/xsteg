@@ -51,7 +51,7 @@ main_args parse_main_args(int argc, char** argv)
         else if(arg == "-t")
         {
             std::string type = next_arg();
-            std::string dir  = next_arg();            
+            std::string dir  = next_arg();
             std::string bits = next_arg();
             std::string val  = next_arg();
             str_toupper(type);
@@ -63,7 +63,7 @@ main_args parse_main_args(int argc, char** argv)
             threshold.value = std::stof(val);
             threshold.bits = parse_px_availability_bits(bits);
             result.thresholds.push_back(threshold);
-        }        
+        }
         else if(arg == "-df")
         {
             std::string datafile = next_arg();

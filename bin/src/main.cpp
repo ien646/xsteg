@@ -82,7 +82,7 @@ void diff_map(main_args& args)
 {
     image img(args.input_img);
     if(!args.restore_key.empty()) { restore_key(args); }
-    image diff_map = generate_visual_data_diff_map(&img, args.thresholds[0].data_type, args.thresholds[0].value);
+    image diff_map = generate_visual_data_diff_image(&img, args.thresholds[0].data_type, args.thresholds[0].value);
     diff_map.write_to_file(args.output_img);
 }
 
@@ -92,35 +92,49 @@ void vdata_maps(main_args& args)
 
     auto log_gen = [](const std::string& type) -> void
     {
-        std::cout << "Generating visual data map [" << type << "]" << std::endl;
+        std::cout << "Generating visual data image [" << type << "]" << std::endl;
     };
-
+    
     log_gen("ALPHA");
-    image vmap_alpha = generate_visual_data_map(&img, visual_data_type::ALPHA);
-    log_gen("AVERAGE_VALUE_RGB");
-    image vmap_avgrgb = generate_visual_data_map(&img, visual_data_type::AVERAGE_VALUE_RGB);
-    log_gen("AVERAGE_VALUE_RGBA");
-    image vmap_avgrgba = generate_visual_data_map(&img, visual_data_type::AVERAGE_VALUE_RGBA);
-    log_gen("COLOR_BLUE");
-    image vmap_b = generate_visual_data_map(&img, visual_data_type::COLOR_BLUE);
-    log_gen("COLOR_GREEN");
-    image vmap_g = generate_visual_data_map(&img, visual_data_type::COLOR_GREEN);
-    log_gen("COLOR_RED");
-    image vmap_r = generate_visual_data_map(&img, visual_data_type::COLOR_RED);
-    log_gen("LUMINANCE");
-    image vmap_lum = generate_visual_data_map(&img, visual_data_type::LUMINANCE);
-    log_gen("SATURATION");
-    image vmap_sat = generate_visual_data_map(&img, visual_data_type::SATURATION);
-
-    std::cout << "Saving files..." << std::endl;
+    image vmap_alpha = generate_visual_data_image(&img, visual_data_type::ALPHA);
     vmap_alpha.write_to_file(args.input_img + ".ALPHA.png");
+    vmap_alpha.~image();
+
+    log_gen("AVERAGE_VALUE_RGB");
+    image vmap_avgrgb = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGB);
     vmap_avgrgb.write_to_file(args.input_img + ".AVERAGE_VALUE_RGB.png");
+    vmap_avgrgb.~image();
+
+    log_gen("AVERAGE_VALUE_RGBA");
+    image vmap_avgrgba = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGBA);
     vmap_avgrgba.write_to_file(args.input_img + ".AVERAGE_VALUE_RGBA.png");
+    vmap_avgrgba.~image();
+
+    log_gen("COLOR_BLUE");
+    image vmap_b = generate_visual_data_image(&img, visual_data_type::COLOR_BLUE);
     vmap_b.write_to_file(args.input_img + ".COLOR_BLUE.png");
+    vmap_b.~image();
+
+    log_gen("COLOR_GREEN");
+    image vmap_g = generate_visual_data_image(&img, visual_data_type::COLOR_GREEN);
     vmap_g.write_to_file(args.input_img + ".COLOR_GREEN.png");
+    vmap_g.~image();
+
+    log_gen("COLOR_RED");
+    image vmap_r = generate_visual_data_image(&img, visual_data_type::COLOR_RED);
     vmap_r.write_to_file(args.input_img + ".COLOR_RED.png");
+    vmap_r.~image();
+
+    log_gen("LUMINANCE");
+    image vmap_lum = generate_visual_data_image(&img, visual_data_type::LUMINANCE);
     vmap_lum.write_to_file(args.input_img + ".LUMINANCE.png");
+    vmap_lum.~image();
+
+    log_gen("SATURATION");
+    image vmap_sat = generate_visual_data_image(&img, visual_data_type::SATURATION);
     vmap_sat.write_to_file(args.input_img + ".SATURATION.png");
+    vmap_sat.~image();
+    
     std::cout << "Done!" << std::endl;
 }
 
