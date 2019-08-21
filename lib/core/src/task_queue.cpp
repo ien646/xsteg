@@ -72,10 +72,9 @@ namespace xsteg
 
     task_queue::task_t task_queue::dequeue_task_lock(std::mutex& queue_lock)
     {
-        queue_lock.lock();
+        std::lock_guard lock(queue_lock);
         task_t tsk = _queue.front();
         _queue.pop();
-        queue_lock.unlock();
         return tsk;
     }
 
