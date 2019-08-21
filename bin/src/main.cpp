@@ -4,9 +4,11 @@
 #include <chrono>
 #include <cctype>
 #include <fstream>
+#include <mutex>
 
 #include <xsteg/steganographer.hpp>
 #include <xsteg/runtime_settings.hpp>
+#include <xsteg/task_queue.hpp>
 
 #include "utils.hpp"
 #include "program_args.hpp"
@@ -177,50 +179,72 @@ void vdata_maps(main_args& args)
 
     image img(args.input_img);
 
-    auto log_gen = [](const std::string& type) -> void
+    std::mutex log_mux;
+    auto log_gen = [&](const std::string& type) -> void
     {
+        std::lock_guard<std::mutex> lock(log_mux);
         std::cout << "Generating visual data image [" << type << "]" << std::endl;
     };
+
+    task_queue tq;
+
+    tq.enqueue([&]()
+    {
+        log_gen("ALPHA");
+        image vmap_alpha = generate_visual_data_image(&img, visual_data_type::ALPHA);
+        vmap_alpha.write_to_file(args.input_img + ".ALPHA.png");
+    });
     
-    log_gen("ALPHA");
-    image vmap_alpha = generate_visual_data_image(&img, visual_data_type::ALPHA);
-    vmap_alpha.write_to_file(args.input_img + ".ALPHA.png");
-    vmap_alpha.~image();
+    tq.enqueue([&]()
+    {
+        log_gen("AVERAGE_VALUE_RGB");
+        image vmap_avgrgb = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGB);
+        vmap_avgrgb.write_to_file(args.input_img + ".AVERAGE_VALUE_RGB.png");
+    });
 
-    log_gen("AVERAGE_VALUE_RGB");
-    image vmap_avgrgb = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGB);
-    vmap_avgrgb.write_to_file(args.input_img + ".AVERAGE_VALUE_RGB.png");
-    vmap_avgrgb.~image();
+    tq.enqueue([&]()
+    {
+        log_gen("AVERAGE_VALUE_RGBA");
+        image vmap_avgrgba = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGBA);
+        vmap_avgrgba.write_to_file(args.input_img + ".AVERAGE_VALUE_RGBA.png");
+    });
 
-    log_gen("AVERAGE_VALUE_RGBA");
-    image vmap_avgrgba = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGBA);
-    vmap_avgrgba.write_to_file(args.input_img + ".AVERAGE_VALUE_RGBA.png");
-    vmap_avgrgba.~image();
+    tq.enqueue([&]()
+    {
+        log_gen("COLOR_BLUE");
+        image vmap_b = generate_visual_data_image(&img, visual_data_type::COLOR_BLUE);
+        vmap_b.write_to_file(args.input_img + ".COLOR_BLUE.png");
+    });  
 
-    log_gen("COLOR_BLUE");
-    image vmap_b = generate_visual_data_image(&img, visual_data_type::COLOR_BLUE);
-    vmap_b.write_to_file(args.input_img + ".COLOR_BLUE.png");
-    vmap_b.~image();
+    tq.enqueue([&]()
+    {
+        log_gen("COLOR_GREEN");
+        image vmap_g = generate_visual_data_image(&img, visual_data_type::COLOR_GREEN);
+        vmap_g.write_to_file(args.input_img + ".COLOR_GREEN.png");
+    });  
 
-    log_gen("COLOR_GREEN");
-    image vmap_g = generate_visual_data_image(&img, visual_data_type::COLOR_GREEN);
-    vmap_g.write_to_file(args.input_img + ".COLOR_GREEN.png");
-    vmap_g.~image();
+    tq.enqueue([&]()
+    {
+        log_gen("COLOR_RED");
+        image vmap_r = generate_visual_data_image(&img, visual_data_type::COLOR_RED);
+        vmap_r.write_to_file(args.input_img + ".COLOR_RED.png");
+    });  
 
-    log_gen("COLOR_RED");
-    image vmap_r = generate_visual_data_image(&img, visual_data_type::COLOR_RED);
-    vmap_r.write_to_file(args.input_img + ".COLOR_RED.png");
-    vmap_r.~image();
+    tq.enqueue([&]()
+    {
+        log_gen("LUMINANCE");
+        image vmap_lum = generate_visual_data_image(&img, visual_data_type::LUMINANCE);
+        vmap_lum.write_to_file(args.input_img + ".LUMINANCE.png");
+    });
 
-    log_gen("LUMINANCE");
-    image vmap_lum = generate_visual_data_image(&img, visual_data_type::LUMINANCE);
-    vmap_lum.write_to_file(args.input_img + ".LUMINANCE.png");
-    vmap_lum.~image();
+    tq.enqueue([&]()
+    {
+        log_gen("SATURATION");
+        image vmap_sat = generate_visual_data_image(&img, visual_data_type::SATURATION);
+        vmap_sat.write_to_file(args.input_img + ".SATURATION.png");
+    });
 
-    log_gen("SATURATION");
-    image vmap_sat = generate_visual_data_image(&img, visual_data_type::SATURATION);
-    vmap_sat.write_to_file(args.input_img + ".SATURATION.png");
-    vmap_sat.~image();
+    tq.run(false);
     
     std::cout << "Done!" << std::endl;
 }

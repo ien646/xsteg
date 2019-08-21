@@ -58,6 +58,8 @@
         "unordered_map": "cpp",
         "xhash": "cpp",
         "mutex": "cpp",
-        "cfloat": "cpp"
+        "cfloat": "cpp",
+        "deque": "cpp",
+        "queue": "cpp"
     }
 }
