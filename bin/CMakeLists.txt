@@ -8,4 +8,4 @@ set(XSTEG_SOURCES
     src/utils.cpp)
 
 add_executable(xsteg ${XSTEG_SOURCES})
-target_link_libraries(xsteg xsteg.core stb)
+target_link_libraries(xsteg xsteg.core stb strutils)

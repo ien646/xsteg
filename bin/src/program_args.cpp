@@ -54,7 +54,8 @@ main_args parse_main_args(int argc, char** argv)
         else if(arg == "-oif")
         {
             std::string fmtstr = next_arg();
-            str_toupper(fmtstr);
+            strutils::to_upper_in_place(fmtstr);
+
             if(fmtstr == "JPG" || fmtstr == "JPEG")
             {
                 result.output_img_format = image_format::jpeg;
@@ -91,8 +92,8 @@ main_args parse_main_args(int argc, char** argv)
             std::string dir  = next_arg();
             std::string bits = next_arg();
             std::string val  = next_arg();
-            str_toupper(type);
-            str_toupper(dir);
+            strutils::to_upper_in_place(type);
+            strutils::to_upper_in_place(dir);
 
             availability_threshold threshold;
             threshold.data_type = visual_data_type_name_map.at(type);

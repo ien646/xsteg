@@ -4,13 +4,6 @@
 
 using namespace xsteg;
 
-void str_toupper(std::string& str)
-{
-    std::transform(str.begin(), str.end(), str.begin(), [](char ch)
-    {
-        return std::toupper(ch);
-    });
-}
 
 pixel_availability parse_px_availability_bits(const std::string& bits_str)
 {
