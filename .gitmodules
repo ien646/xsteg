@@ -1,0 +1,3 @@
+[submodule "third-party/strutils"]
+	path = third-party/strutils
+	url = https://github.com/bigiansen/strutils

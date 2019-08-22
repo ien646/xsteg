@@ -108,20 +108,18 @@ namespace xsteg
         }
     }
 
-    void image::write_to_file(const std::string& fname)
+    void image::write_to_file(const std::string& fname, image_save_options opt)
     {
-        int result = stbi_write_png(
-            fname.c_str(), 
-            _width, 
-            _height, 
-            static_cast<int>(_channels), 
-            _data, 
-            _width * static_cast<int>(_channels)
-        );
-        if(result == 0)
+        switch(opt.format)
         {
-            std::cerr << "Unable to save png image file: [" << fname << "]" << std::endl;
-            exit(-1);
+            case image_format::png:
+            {
+                write_to_file_png(fname);
+            }
+            case image_format::jpeg:
+            {
+                write_to_file_jpeg(fname, opt.jpeg_quality);
+            }
         }
     }
 
@@ -180,6 +178,40 @@ namespace xsteg
 
             bit_count_accum += step_bits;
             if(bit_count_accum >= max_truncated_bits) { break; }
+        }
+    }
+
+    void image::write_to_file_png(const std::string& fname)
+    {
+        int result = stbi_write_png(
+            fname.c_str(), 
+            _width, 
+            _height, 
+            static_cast<int>(_channels), 
+            _data, 
+            _width * static_cast<int>(_channels)
+        );
+        if(result == 0)
+        {
+            std::cerr << "Unable to save png image file: [" << fname << "]" << std::endl;
+            exit(-1);
+        }
+    }
+
+    void image::write_to_file_jpeg(const std::string& fname, int quality)
+    {
+        int result = stbi_write_jpg(
+            fname.c_str(), 
+            _width, 
+            _height, 
+            static_cast<int>(_channels), 
+            _data, 
+            quality
+        );
+        if(result == 0)
+        {
+            std::cerr << "Unable to save png image file: [" << fname << "]" << std::endl;
+            exit(-1);
         }
     }
 }

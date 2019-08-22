@@ -1,7 +1,10 @@
 #include "program_args.hpp"
 
 #include <fstream>
+#include <iostream>
+
 #include <xsteg/runtime_settings.hpp>
+#include <strutils/strutils.hpp>
 
 #include "utils.hpp"
 
@@ -48,6 +51,28 @@ main_args parse_main_args(int argc, char** argv)
         else if(arg == "-of")   { result.output_file = next_arg(); }
         else if(arg == "-x")    { result.data = str_to_datavec(next_arg()); }
         else if(arg == "-v")    { runtime_settings::verbose = true; }
+        else if(arg == "-oif")
+        {
+            std::string fmtstr = next_arg();
+            str_toupper(fmtstr);
+            if(fmtstr == "JPG" || fmtstr == "JPEG")
+            {
+                result.output_img_format = image_format::jpeg;
+            }
+            else if(fmtstr == "PNG")
+            {
+                result.output_img_format = image_format::png;
+            }
+            else
+            {
+                std::cout << "Invalid image format: '" << fmtstr << "', aborting...";
+                exit(-1);
+            }
+        }
+        else if(arg == "-oiq")
+        {
+            result.output_img_jpeg_quality = std::stoi(next_arg());
+        }
         else if(arg == "-ra")
         { 
             result.mode = encode_mode::RESIZE_ABSOLUTE;
@@ -158,6 +183,8 @@ Other arguments\n\
 \n\
 '-ii': Input image file-path\n\
 '-oi': Output image file-path (encoding, exclusively png format)\n\
+'-oif': Output image format (either PNG or JPEG)\n\
+'-oiq': Output image quality (1-100, exclusive to JPEG format)\n\
 '-of': Output file-path (decoding)\n\
 '-x' : Direct text-data input (encoding, not-recommended)\n\
 '-df': Input data file (encoding)\n\

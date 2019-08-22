@@ -51,7 +51,7 @@ namespace xsteg
                     {
                         task_t tsk = dequeue_task_lock(queue_lock);
                         inc_currently_running_tasks();
-                        tsk();
+                        if(tsk != nullptr) { tsk(); };
                         dec_currently_running_tasks();
                     }));
                 }
@@ -73,9 +73,17 @@ namespace xsteg
     task_queue::task_t task_queue::dequeue_task_lock(std::mutex& queue_lock)
     {
         std::lock_guard lock(queue_lock);
-        task_t tsk = _queue.front();
-        _queue.pop();
-        return tsk;
+        if(_queue.size())
+        {
+            task_t tsk = _queue.front();
+            _queue.pop();
+            return tsk;
+        }
+        else
+        {
+            return nullptr;
+        }
+        
     }
 
     size_t task_queue::queue_size_lock(std::mutex& queue_lock)

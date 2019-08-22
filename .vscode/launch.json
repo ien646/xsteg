@@ -58,7 +58,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build_debug_win64/output/bin/xsteg/xsteg.exe",
-            "args": ["-vd", "-ii", "img.jpg"],
+            "args": ["-vd", "-ii", "img.jpg", "-oif", "jpeg", "-oiq", "50"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/build_debug_win64/output/bin/xsteg",
             "environment": [],

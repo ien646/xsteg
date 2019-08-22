@@ -1,6 +1,7 @@
 #pragma once
 
 #include <xsteg/availability_map.hpp>
+#include <xsteg/image.hpp>
 
 #include <vector>
 #include <string>
@@ -29,6 +30,8 @@ struct main_args
     std::string input_file;
     std::string output_file;
     std::string restore_key;
+    xsteg::image_format output_img_format = xsteg::image_format::png;
+    int output_img_jpeg_quality = static_cast<int>(xsteg::jpeg_quality::very_high);
     float resize_w = 0, resize_h = 0;
 };
 

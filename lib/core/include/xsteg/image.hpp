@@ -11,6 +11,31 @@ namespace xsteg
     class image_reader;
     struct pixel_availability;
 
+    enum class image_format
+    {
+        png,
+        jpeg
+    };
+
+    enum class jpeg_quality : int
+    {
+        minimum = 1,
+        very_low = 10,
+        low = 25,
+        medium = 50,
+        high = 75,
+        very_high = 90,
+        maximum = 100
+    };
+
+    struct image_save_options
+    {
+        image_format format = image_format::png;
+        int jpeg_quality = static_cast<int>(jpeg_quality::very_high);
+
+        constexpr image_save_options() {}
+    };
+
     class image
     {
     private:
@@ -34,7 +59,7 @@ namespace xsteg
         image create_resized_copy_proportional(float percentage_w, float percentage_h);
 
         void read_from_file(const std::string& fname);
-        void write_to_file(const std::string& fname);
+        void write_to_file(const std::string& fname, image_save_options opt = image_save_options());
 
         const uint8_t* cdata() const;
         uint8_t* data();
@@ -50,5 +75,9 @@ namespace xsteg
         void truncate_threshold_bits(
             pixel_availability&, 
             size_t max_truncated_bits = std::numeric_limits<size_t>::max());
+
+    private:
+        void write_to_file_png(const std::string& fname);
+        void write_to_file_jpeg(const std::string& fname, int quality);
     };
 }

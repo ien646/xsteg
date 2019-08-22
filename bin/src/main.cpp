@@ -170,7 +170,12 @@ void diff_map(main_args& args)
     if(!args.restore_key.empty()) { restore_key(args); }
 
     image diff_map = generate_visual_data_diff_image(&img, args.thresholds[0].data_type, args.thresholds[0].value);
-    diff_map.write_to_file(args.output_img);
+    
+    image_save_options opt;
+    opt.format = args.output_img_format;
+    opt.jpeg_quality = args.output_img_jpeg_quality;
+
+    diff_map.write_to_file(args.output_img, opt);
 }
 
 void vdata_maps(main_args& args)
@@ -186,62 +191,68 @@ void vdata_maps(main_args& args)
         std::cout << "Generating visual data image [" << type << "]" << std::endl;
     };
 
+    image_save_options opt;
+    opt.format = args.output_img_format;
+    opt.jpeg_quality = args.output_img_jpeg_quality;
+
+    std::string file_ext = (opt.format == image_format::png) ? ".png" : ".jpg";
+
     task_queue tq;
 
     tq.enqueue([&]()
     {
         log_gen("ALPHA");
         image vmap_alpha = generate_visual_data_image(&img, visual_data_type::ALPHA);
-        vmap_alpha.write_to_file(args.input_img + ".ALPHA.png");
+        vmap_alpha.write_to_file(args.input_img + ".ALPHA" + file_ext, opt);
     });
     
     tq.enqueue([&]()
     {
         log_gen("AVERAGE_VALUE_RGB");
         image vmap_avgrgb = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGB);
-        vmap_avgrgb.write_to_file(args.input_img + ".AVERAGE_VALUE_RGB.png");
+        vmap_avgrgb.write_to_file(args.input_img + ".AVERAGE_VALUE_RGB" + file_ext, opt);
     });
 
     tq.enqueue([&]()
     {
         log_gen("AVERAGE_VALUE_RGBA");
         image vmap_avgrgba = generate_visual_data_image(&img, visual_data_type::AVERAGE_VALUE_RGBA);
-        vmap_avgrgba.write_to_file(args.input_img + ".AVERAGE_VALUE_RGBA.png");
+        vmap_avgrgba.write_to_file(args.input_img + ".AVERAGE_VALUE_RGBA" + file_ext, opt);
     });
 
     tq.enqueue([&]()
     {
         log_gen("COLOR_BLUE");
         image vmap_b = generate_visual_data_image(&img, visual_data_type::COLOR_BLUE);
-        vmap_b.write_to_file(args.input_img + ".COLOR_BLUE.png");
+        vmap_b.write_to_file(args.input_img + ".COLOR_BLUE" + file_ext, opt);
     });  
 
     tq.enqueue([&]()
     {
         log_gen("COLOR_GREEN");
         image vmap_g = generate_visual_data_image(&img, visual_data_type::COLOR_GREEN);
-        vmap_g.write_to_file(args.input_img + ".COLOR_GREEN.png");
+        vmap_g.write_to_file(args.input_img + ".COLOR_GREEN" + file_ext, opt);
     });  
 
     tq.enqueue([&]()
     {
         log_gen("COLOR_RED");
         image vmap_r = generate_visual_data_image(&img, visual_data_type::COLOR_RED);
-        vmap_r.write_to_file(args.input_img + ".COLOR_RED.png");
+        vmap_r.write_to_file(args.input_img + ".COLOR_RED" + file_ext, opt);
     });  
 
     tq.enqueue([&]()
     {
         log_gen("LUMINANCE");
         image vmap_lum = generate_visual_data_image(&img, visual_data_type::LUMINANCE);
-        vmap_lum.write_to_file(args.input_img + ".LUMINANCE.png");
+        vmap_lum.write_to_file(args.input_img + ".LUMINANCE" + file_ext, opt);
     });
 
     tq.enqueue([&]()
     {
         log_gen("SATURATION");
         image vmap_sat = generate_visual_data_image(&img, visual_data_type::SATURATION);
-        vmap_sat.write_to_file(args.input_img + ".SATURATION.png");
+        vmap_sat.write_to_file(args.input_img + ".SATURATION" + file_ext, opt);
     });
 
     tq.run(false);

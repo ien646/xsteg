@@ -12,5 +12,10 @@ set(XSTEG_CORE_SOURCES
 find_package(Threads)
 
 add_library(xsteg.core STATIC ${XSTEG_CORE_SOURCES})
-target_link_libraries(xsteg.core stb ${CMAKE_THREAD_LIBS_INIT})
+
+target_link_libraries(xsteg.core 
+    stb 
+    strutils 
+    ${CMAKE_THREAD_LIBS_INIT})
+    
 target_include_directories(xsteg.core PUBLIC include)

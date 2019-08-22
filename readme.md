@@ -51,7 +51,7 @@ For input image files (i.e. images onto which data will be encoded), supported f
 - **psd** _(composited view only, no extra channels, 8/16 bit-per-channel)_
 - **gif**
 
-**For output images, the only supported format is 4-channel png**. Technically, any lossless 3~4 channel image format could be used, as long as the alpha is ignored for 3-channel formats.
+**For encoded output images, the only supported format is 4-channel png. Other functionalities, such as visual data map extraction can output jpeg images**. Technically, any lossless 3~4 channel image format could be used, as long as the alpha is ignored for 3-channel formats.
 
 ## Building
 
@@ -124,7 +124,11 @@ Just do a standard CMake build. E.g. _(assuming a POSIX style CLI)_:
 ```
 `-ii`: Input image path
 
-`-oi`: Output image path (encoding, exclusively png format)
+`-oi`: Output image path
+
+`-oif`: Output image format (either PNG or JPEG)
+
+`-oiq`: Output image quality (1-100, exclusive to JPEG format)
 
 `-if`: Input file path (key restore)
 
