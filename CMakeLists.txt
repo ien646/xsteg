@@ -25,6 +25,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/lib/sha
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/lib/static)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE 	${PROJECT_BINARY_DIR}/output/bin/no-category)
 
+option(XSTEG_BUILD_CLI_EXECUTABLE "Build CLI executable application" on)
+
 add_subdirectory("third-party")
 add_subdirectory("lib")
-add_subdirectory("bin")
+
+if(XSTEG_BUILD_CLI_EXECUTABLE)
+	add_subdirectory("bin")
+endif()
