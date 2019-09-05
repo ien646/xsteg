@@ -11,8 +11,8 @@
 namespace xsteg
 {
     steganographer::steganographer(const std::string& fname)
+        : _img(std::make_unique<image>(fname))
     {
-        _img = std::make_unique<image>(fname);
         _av_map = std::make_unique<availability_map>(_img.get());
     }
 

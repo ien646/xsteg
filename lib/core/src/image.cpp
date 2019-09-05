@@ -56,6 +56,21 @@ namespace xsteg
         mv_src._width = -1;
     }
 
+    void image::operator=(image&& mv_src)
+    {
+        _data = mv_src._data;
+        _width = mv_src._width;
+        _height = mv_src._height;
+        _channels = mv_src._channels;
+        _loaded_stbi = mv_src._loaded_stbi;
+
+        mv_src._data = nullptr;
+        mv_src._channels = -1;
+        mv_src._height = -1;
+        mv_src._loaded_stbi = false;
+        mv_src._width = -1;
+    }
+
     image image::create_copy()
     {
         image result(_width, _height);

@@ -16,7 +16,7 @@ namespace xsteg
         std::unique_ptr<availability_map> _av_map;
 
     public:
-        steganographer(const std::string& fname);
+        explicit steganographer(const std::string& fname);
 
         void add_threshold(
             visual_data_type type, 

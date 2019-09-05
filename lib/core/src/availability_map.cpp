@@ -10,6 +10,7 @@
 #include <mutex>
 #include <sstream>
 #include <thread>
+#include <numeric>
 
 namespace xsteg
 {
@@ -87,11 +88,9 @@ namespace xsteg
         size_t to_px,
         const _vdata_map_map_t& vdata_maps)
     {
-        const size_t total_px = _thresholds.size() * (to_px - from_px);
         for(size_t thi = 0; thi < _thresholds.size(); ++thi)
         {
             auto& thres = _thresholds[thi];
-            const size_t pixel_count =_img->pixel_count();
             const size_t report_threshold_px = 400000 + std::abs(rand() % 100000); // report progress every x pixels
             const std::vector<float>& vdata = vdata_maps.at(thres.data_type);
             for(size_t pxi = from_px; pxi < to_px; ++pxi)
@@ -232,12 +231,15 @@ namespace xsteg
 
     size_t availability_map::available_data_space()
     {
-        size_t accum = 0;
-        for(auto& pxav : _map)
-        {
-            accum += (pxav.r + pxav.g + pxav.b + pxav.a);
-        }
-        return accum;
+        return std::accumulate<decltype(_map)::const_iterator, size_t>(
+            _map.begin(),
+            _map.end(),
+            0, 
+            [](size_t accum, const pixel_availability& av) -> size_t
+            {
+                return accum + (av.r + av.g + av.b + av.a);
+            }
+        );
     }
 
     const char TYPE_DESIGNATOR = '&';

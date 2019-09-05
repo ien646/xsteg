@@ -53,6 +53,9 @@ namespace xsteg
         image(const image& cp_src) = delete;
         image(image&& mv_src);
 
+        void operator=(const image& cp_src) = delete;
+        void operator=(image&& mv_src);
+
         image create_copy();
 
         image create_resized_copy_absolute(int px_width, int px_height);

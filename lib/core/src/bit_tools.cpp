@@ -31,7 +31,7 @@ namespace xsteg
 
     bool get_bit(uint8_t byte, size_t idx)
     {
-        assert(idx < 7 && idx >= 0);
+        assert(idx < 7);
         uint8_t mask = (uint8_t)1 << idx;
         return (byte | mask) == byte;
     }
