@@ -2,6 +2,9 @@
 
 #include <xsteg/runtime_settings.hpp>
 #include <xsteg/synced_print.hpp>
+
+#include <strutils/strutils.hpp>
+
 #include <algorithm>
 #include <cassert>
 #include <chrono>
@@ -19,12 +22,43 @@ namespace xsteg
     static const char BITS_OV_DESIGNATOR = '*';
     static const char VALUE_DESIGNATOR = '+';
 
+    std::map<visual_data_type, char> type_designators = {
+        { visual_data_type::ALPHA, '3' },
+        { visual_data_type::AVERAGE_VALUE_RGB, 'V' },
+        { visual_data_type::AVERAGE_VALUE_RGBA, 'W' }, 
+        { visual_data_type::COLOR_BLUE, '2' },
+        { visual_data_type::COLOR_GREEN, '1' }, 
+        { visual_data_type::COLOR_RED, '0' },
+        { visual_data_type::LUMINANCE, 'L' },
+        { visual_data_type::SATURATION, 'S' }
+    };
+
+    std::map<char, visual_data_type> type_designators_rev = {
+        { '3', visual_data_type::ALPHA  },
+        { 'V', visual_data_type::AVERAGE_VALUE_RGB  },
+        { 'W', visual_data_type::AVERAGE_VALUE_RGBA  }, 
+        { '2', visual_data_type::COLOR_BLUE },
+        { '1', visual_data_type::COLOR_GREEN }, 
+        { '0', visual_data_type::COLOR_RED },
+        { 'L', visual_data_type::LUMINANCE },
+        { 'S', visual_data_type::SATURATION }
+    };
+
+    std::string bits_ov_to_string(pixel_availability& bits)
+    {
+        std::stringstream ss;
+        if(bits.r == -1) { ss << '_'; } else { ss << bits.r; }
+        if(bits.g == -1) { ss << '_'; } else { ss << bits.g; }
+        if(bits.b == -1) { ss << '_'; } else { ss << bits.b; }
+        if(bits.a == -1) { ss << '_'; } else { ss << bits.a; }
+        return ss.str();
+    }
+
     std::vector<availability_threshold> parse_thresholds_key(const std::string& key)
     {
         std::vector<availability_threshold> result;
 
-        std::vector<std::string> types = 
-            str_split(std::string_view(key), TYPE_DESIGNATOR);
+        std::vector<std::string_view> types = strutils::split_view(std::string_view(key), TYPE_DESIGNATOR);
 
         for(auto& type : types)
         {
@@ -49,8 +83,8 @@ namespace xsteg
             if(type[7] == '_'){ ba = -1; } else { ba = std::stoi(std::string(1, type[7])); }
 
             if(type[8] != VALUE_DESIGNATOR) { exit(-3); }
-            std::string fstr = type.substr(9);
-            float val = std::stof(fstr);
+            std::string_view fstr = type.substr(9);
+            float val = std::stof(std::string(fstr));
             availability_threshold th;
             th.data_type = vdt;
             th.direction = dir;
@@ -265,38 +299,6 @@ namespace xsteg
         }
     }
 
-    std::map<visual_data_type, char> type_designators = {
-        { visual_data_type::ALPHA, '3' },
-        { visual_data_type::AVERAGE_VALUE_RGB, 'V' },
-        { visual_data_type::AVERAGE_VALUE_RGBA, 'W' }, 
-        { visual_data_type::COLOR_BLUE, '2' },
-        { visual_data_type::COLOR_GREEN, '1' }, 
-        { visual_data_type::COLOR_RED, '0' },
-        { visual_data_type::LUMINANCE, 'L' },
-        { visual_data_type::SATURATION, 'S' }
-    };
-
-    std::map<char, visual_data_type> type_designators_rev = {
-        { '3', visual_data_type::ALPHA  },
-        { 'V', visual_data_type::AVERAGE_VALUE_RGB  },
-        { 'W', visual_data_type::AVERAGE_VALUE_RGBA  }, 
-        { '2', visual_data_type::COLOR_BLUE },
-        { '1', visual_data_type::COLOR_GREEN }, 
-        { '0', visual_data_type::COLOR_RED },
-        { 'L', visual_data_type::LUMINANCE },
-        { 'S', visual_data_type::SATURATION }
-    };
-
-    std::string bits_ov_to_string(pixel_availability& bits)
-    {
-        std::stringstream ss;
-        if(bits.r == -1) { ss << '_'; } else { ss << bits.r; }
-        if(bits.g == -1) { ss << '_'; } else { ss << bits.g; }
-        if(bits.b == -1) { ss << '_'; } else { ss << bits.b; }
-        if(bits.a == -1) { ss << '_'; } else { ss << bits.a; }
-        return ss.str();
-    }
-
     size_t availability_map::available_data_space()
     {
         return std::accumulate<decltype(_map)::const_iterator, size_t>(
@@ -309,8 +311,6 @@ namespace xsteg
             }
         );
     }
-
-
 
     std::string availability_map::generate_key()
     {
