@@ -24,6 +24,9 @@ namespace xsteg
         pixel_availability bits;
     };
 
+    extern std::vector<availability_threshold> parse_thresholds_key(const std::string& key);
+    extern std::string generate_thresholds_key(std::vector<availability_threshold>);
+
     class availability_map
     {
     private:

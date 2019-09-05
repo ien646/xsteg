@@ -14,10 +14,75 @@
 
 namespace xsteg
 {
+    static const char TYPE_DESIGNATOR = '&';
+    static const char DIRECTION_DESIGNATOR = '>';
+    static const char BITS_OV_DESIGNATOR = '*';
+    static const char VALUE_DESIGNATOR = '+';
+
+    std::vector<availability_threshold> parse_thresholds_key(const std::string& key)
+    {
+        std::vector<availability_threshold> result;
+
+        std::vector<std::string> types = 
+            str_split(std::string_view(key), TYPE_DESIGNATOR);
+
+        for(auto& type : types)
+        {
+            if(type.empty()) { continue; }
+            if(type.size() < 9)
+            {
+                throw std::invalid_argument("Incorrect threshold format!");
+            }
+            
+            visual_data_type vdt = type_designators_rev.at(type[0]);
+            if(type[1] != DIRECTION_DESIGNATOR) { exit(-1); }
+            threshold_direction dir = (type[2] == 'A') 
+                ? threshold_direction::UP 
+                : threshold_direction::DOWN;
+
+            if(type[3] != BITS_OV_DESIGNATOR) { exit(-2); }
+
+            int br, bg, bb, ba;
+            if(type[4] == '_'){ br = -1; } else { br = std::stoi(std::string(1, type[4])); }
+            if(type[5] == '_'){ bg = -1; } else { bg = std::stoi(std::string(1, type[5])); }
+            if(type[6] == '_'){ bb = -1; } else { bb = std::stoi(std::string(1, type[6])); }
+            if(type[7] == '_'){ ba = -1; } else { ba = std::stoi(std::string(1, type[7])); }
+
+            if(type[8] != VALUE_DESIGNATOR) { exit(-3); }
+            std::string fstr = type.substr(9);
+            float val = std::stof(fstr);
+            availability_threshold th;
+            th.data_type = vdt;
+            th.direction = dir;
+            th.value = val;
+            th.bits = pixel_availability(br, bg, bb, ba);
+            result.push_back(th);
+        }
+        return result;
+    }
+
+    std::string generate_thresholds_key(std::vector<availability_threshold> thresholds)
+    {
+        std::stringstream ss;
+        for(auto& th : thresholds)
+        {
+            bool up = th.direction == threshold_direction::UP;
+            ss  << TYPE_DESIGNATOR
+                << type_designators[th.data_type] 
+                << DIRECTION_DESIGNATOR
+                << (up ? 'A' : 'V')
+                << BITS_OV_DESIGNATOR
+                << bits_ov_to_string(th.bits)
+                << VALUE_DESIGNATOR
+                << th.value;
+        }
+        return ss.str();
+    }
+
     availability_map::availability_map(const image* imgptr)
     {
         _img = imgptr;
-        _map.resize(_img->pixel_count(), pixel_availability(0, 0, 0, 0));
+        _map.resize(_img->pixel_count(), pixel_availability(-1, -1, -1, -1));
     }
 
     void availability_map::add_threshold(
@@ -26,6 +91,9 @@ namespace xsteg
         float val, 
         pixel_availability bits)
     {
+        // Skip useless thresholds
+        if(bits.is_useless()) { return; }
+
         _modified = true;
         availability_threshold thresh;
         thresh.data_type = type;
@@ -95,10 +163,10 @@ namespace xsteg
             const std::vector<float>& vdata = vdata_maps.at(thres.data_type);
             for(size_t pxi = from_px; pxi < to_px; ++pxi)
             {
-                float pxv = vdata[pxi];
+                float px_data_val = vdata[pxi];
                 bool cond = (thres.direction == threshold_direction::UP)
-                            ? pxv >= thres.value
-                            : pxv <= thres.value;
+                            ? px_data_val >= thres.value
+                            : px_data_val <= thres.value;
 
                 if(cond)
                 {
@@ -242,27 +310,11 @@ namespace xsteg
         );
     }
 
-    const char TYPE_DESIGNATOR = '&';
-    const char DIRECTION_DESIGNATOR = '>';
-    const char BITS_OV_DESIGNATOR = '*';
-    const char VALUE_DESIGNATOR = '+';
+
 
     std::string availability_map::generate_key()
     {
-        std::stringstream ss;
-        for(auto& threshold : _thresholds)
-        {
-            bool up = threshold.direction == threshold_direction::UP;
-            ss  << TYPE_DESIGNATOR
-                << type_designators[threshold.data_type] 
-                << DIRECTION_DESIGNATOR
-                << (up ? 'A' : 'V')
-                << BITS_OV_DESIGNATOR
-                << bits_ov_to_string(threshold.bits)
-                << VALUE_DESIGNATOR
-                << threshold.value;
-        }
-        return ss.str();
+        return generate_thresholds_key(_thresholds);
     }
 
     std::vector<std::string> str_split(std::string_view strv, char delim)
@@ -309,38 +361,6 @@ namespace xsteg
 
     std::vector<availability_threshold> availability_map::parse_key(const std::string& key)
     {
-        std::vector<availability_threshold> result;
-
-        std::vector<std::string> types = 
-            str_split(std::string_view(key), TYPE_DESIGNATOR);
-
-        for(auto& type : types)
-        {
-            if(type.empty()) { continue; }
-            visual_data_type vdt = type_designators_rev.at(type[0]);
-            if(type[1] != DIRECTION_DESIGNATOR) { exit(-1); }
-            threshold_direction dir = (type[2] == 'A') 
-                ? threshold_direction::UP 
-                : threshold_direction::DOWN;
-
-            if(type[3] != BITS_OV_DESIGNATOR) { exit(-2); }
-
-            int br, bg, bb, ba;
-            if(type[4] == '_'){ br = -1; } else { br = std::stoi(std::string(1, type[4])); }
-            if(type[5] == '_'){ bg = -1; } else { bg = std::stoi(std::string(1, type[5])); }
-            if(type[6] == '_'){ bb = -1; } else { bb = std::stoi(std::string(1, type[6])); }
-            if(type[7] == '_'){ ba = -1; } else { ba = std::stoi(std::string(1, type[7])); }
-
-            if(type[8] != VALUE_DESIGNATOR) { exit(-3); }
-            std::string fstr = type.substr(9);
-            float val = std::stof(fstr);
-            availability_threshold th;
-            th.data_type = vdt;
-            th.direction = dir;
-            th.value = val;
-            th.bits = pixel_availability(br, bg, bb, ba);
-            result.push_back(th);
-        }
-        return result;
+        return parse_thresholds_key(key);
     }
 }
