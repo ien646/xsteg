@@ -7,5 +7,10 @@ set(XSTEG_CLI_SOURCES
     src/program_args.cpp
     src/utils.cpp)
 
-add_executable(xsteg_cli ${XSTEG_CLI_SOURCES})
+set(XSTEG_CLI_HEADERS
+	src/program_args.hpp
+	src/utils.hpp
+)
+
+add_executable(xsteg_cli ${XSTEG_CLI_SOURCES} ${XSTEG_CLI_HEADERS})
 target_link_libraries(xsteg_cli xsteg.core stb strutils)
