@@ -8,8 +8,7 @@ set(XSTEG_CLI_SOURCES
     src/utils.cpp)
 
 set(XSTEG_CLI_HEADERS
-	src/program_args.hpp
-	src/utils.hpp
+	src/*.hpp
 )
 
 add_executable(xsteg_cli ${XSTEG_CLI_SOURCES} ${XSTEG_CLI_HEADERS})
