@@ -10,7 +10,16 @@ set(XSTEG_CORE_SOURCES
     src/visual_data.cpp)
 	
 set(XSTEG_CORE_HEADERS
-	include/xsteg/*.hpp
+    include/xsteg/availability_map.hpp
+    include/xsteg/bit_tools.hpp
+    include/xsteg/bit_view.hpp
+    include/xsteg/image.hpp
+    include/xsteg/pixel_availability.hpp
+    include/xsteg/runtime_settings.hpp
+    include/xsteg/steganographer.hpp
+    include/xsteg/synced_print.hpp
+    include/xsteg/task_queue.hpp
+    include/xsteg/visual_data.hpp
 )
 
 find_package(Threads)
