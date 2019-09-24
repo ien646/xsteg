@@ -8,11 +8,19 @@ using namespace xsteg;
 pixel_availability parse_px_availability_bits(const std::string& bits_str)
 {
     pixel_availability result;
-    int ibits = std::stoi(bits_str);
-    result.r = ibits / 1000;
-    result.g = (ibits % 1000) / 100;
-    result.b = (ibits % 100) / 10;
-    result.a = (ibits % 10);
+
+    if(bits_str[0] == '_' || bits_str[0] == '-') { result.r = -1; }
+    else { result.r = std::stoi(std::string(1, bits_str[0])); }
+
+    if(bits_str[1] == '_' || bits_str[1] == '-') { result.g = -1; }
+    else { result.g = std::stoi(std::string(1, bits_str[1])); }
+    
+    if(bits_str[2] == '_' || bits_str[2] == '-') { result.b = -1; }
+    else { result.b = std::stoi(std::string(1, bits_str[2])); }
+
+    if(bits_str[3] == '_' || bits_str[3] == '-') { result.a = -1; }
+    else { result.a = std::stoi(std::string(1, bits_str[3])); }
+    
     return result;
 }
 
