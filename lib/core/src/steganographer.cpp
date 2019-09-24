@@ -148,7 +148,7 @@ namespace xsteg
             auto av_bits = *space_it;
             uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
-            if(!av_bits.is_zero())
+            if(!av_bits.is_useless())
             {
                 if(av_bits.r) { set_last_bits(pxptr + 0, request_bits(av_bits.r)); }
                 if(av_bits.g) { set_last_bits(pxptr + 1, request_bits(av_bits.g)); }

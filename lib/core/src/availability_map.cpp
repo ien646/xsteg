@@ -307,7 +307,11 @@ namespace xsteg
             0, 
             [](size_t accum, const pixel_availability& av) -> size_t
             {
-                return accum + (av.r + av.g + av.b + av.a);
+                return accum + (
+                    std::max(av.r, 0) + 
+                    std::max(av.g, 0) + 
+                    std::max(av.b, 0) + 
+                    std::max(av.a, 0));
             }
         );
     }
