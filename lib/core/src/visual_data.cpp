@@ -24,18 +24,18 @@ namespace xsteg
         visual_data_type type, 
         pixel_availability truncate_bits)
     {
-        assert(truncate_bits.r < 8 && truncate_bits.r >= 0);
-        assert(truncate_bits.g < 8 && truncate_bits.g >= 0);
-        assert(truncate_bits.b < 8 && truncate_bits.b >= 0);
-        assert(truncate_bits.a < 8 && truncate_bits.a >= 0);
+        assert(truncate_bits.r < 8 && truncate_bits.r >= -1);
+        assert(truncate_bits.g < 8 && truncate_bits.g >= -1);
+        assert(truncate_bits.b < 8 && truncate_bits.b >= -1);
+        assert(truncate_bits.a < 8 && truncate_bits.a >= -1);
 
         uint8_t tpx[4];
         std::memcpy(tpx, px, 4);
 
-        tpx[0] &= truncation_masks[truncate_bits.r];
-        tpx[1] &= truncation_masks[truncate_bits.g];
-        tpx[2] &= truncation_masks[truncate_bits.b];
-        tpx[3] &= truncation_masks[truncate_bits.a];
+        tpx[0] &= truncation_masks[std::max(truncate_bits.r, 0)];
+        tpx[1] &= truncation_masks[std::max(truncate_bits.g, 0)];
+        tpx[2] &= truncation_masks[std::max(truncate_bits.b, 0)];
+        tpx[3] &= truncation_masks[std::max(truncate_bits.a, 0)];
 
         switch (type)
         {
