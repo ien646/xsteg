@@ -80,7 +80,7 @@ void require_data(main_args& args)
     }
 }
 
-void require_resize_values(main_args args)
+void require_resize_values(main_args& args)
 {
     if(args.resize_w <= 0 || args.resize_h <= 0)
     {
