@@ -41,7 +41,7 @@ namespace xsteg
         }
     }
 
-    image::image(image&& mv_src)
+    image::image(image&& mv_src) noexcept
     {
         _data = mv_src._data;
         _width = mv_src._width;
@@ -56,7 +56,7 @@ namespace xsteg
         mv_src._width = -1;
     }
 
-    void image::operator=(image&& mv_src)
+    void image::operator=(image&& mv_src) noexcept
     {
         _data = mv_src._data;
         _width = mv_src._width;
@@ -118,8 +118,9 @@ namespace xsteg
         _channels = 4;
         if(_data == nullptr)
         {
-            std::cerr << "Unable to open image file: [" << fname << "]" << std::endl;
-            exit(-1);
+			throw std::invalid_argument(
+				std::string("Unable to open image file: [") + fname + "]"
+			);
         }
     }
 
@@ -168,7 +169,7 @@ namespace xsteg
 
     size_t image::pixel_count() const
     {
-        return static_cast<size_t>(_width * _height);
+        return static_cast<size_t>((size_t)_width * _height);
     }
 
     void image::truncate_threshold_bits(
@@ -180,7 +181,7 @@ namespace xsteg
         uint8_t mask_b = ~((uint8_t)std::pow(2, bits.b)) - 1;
         uint8_t mask_a = ~((uint8_t)std::pow(2, bits.a)) - 1;
 
-        size_t step_bits = (bits.r + bits.g + bits.b + bits.a);
+        size_t step_bits = ((size_t)bits.r + bits.g + bits.b + bits.a);
         size_t bit_count_accum = 0;
 
         for(size_t i = 0; i < pixel_count(); ++i)
@@ -208,8 +209,9 @@ namespace xsteg
         );
         if(result == 0)
         {
-            std::cerr << "Unable to save png image file: [" << fname << "]" << std::endl;
-            exit(-1);
+			throw std::invalid_argument(
+				std::string("Unable to save png image file: [") + fname + "]"
+			);
         }
     }
 
@@ -225,8 +227,9 @@ namespace xsteg
         );
         if(result == 0)
         {
-            std::cerr << "Unable to save png image file: [" << fname << "]" << std::endl;
-            exit(-1);
+			throw std::invalid_argument(
+				std::string("Unable to save jpeg image file: [") + fname + "]"
+			);
         }
     }
 }

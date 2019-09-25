@@ -51,10 +51,10 @@ namespace xsteg
         ~image();
 
         image(const image& cp_src) = delete;
-        image(image&& mv_src);
+        image(image&& mv_src) noexcept;
 
         void operator=(const image& cp_src) = delete;
-        void operator=(image&& mv_src);
+        void operator=(image&& mv_src) noexcept;
 
         image create_copy();
 

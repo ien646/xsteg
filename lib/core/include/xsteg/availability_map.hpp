@@ -18,9 +18,9 @@ namespace xsteg
 
     struct availability_threshold
     {
-        visual_data_type data_type;
-        float value;
-        threshold_direction direction;
+        visual_data_type data_type = visual_data_type::COLOR_RED;
+        float value = 0;
+        threshold_direction direction = threshold_direction::UP;
         pixel_availability bits;
     };
 

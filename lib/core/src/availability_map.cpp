@@ -69,27 +69,63 @@ namespace xsteg
             }
             
             visual_data_type vdt = type_designators_rev.at(type[0]);
-            if(type[1] != DIRECTION_DESIGNATOR) { exit(-1); }
+            if(type[1] != DIRECTION_DESIGNATOR) 
+			{ 
+				throw std::invalid_argument("Invalid threshold format! [DIRECTION_DESIGNATOR]");
+			}
             threshold_direction dir = (type[2] == 'A') 
                 ? threshold_direction::UP 
                 : threshold_direction::DOWN;
 
-            if(type[3] != BITS_OV_DESIGNATOR) { exit(-2); }
+            if(type[3] != BITS_OV_DESIGNATOR) 
+			{ 
+				throw std::invalid_argument("Invalid threshold format! [BITS_OV_DESIGNATOR]");
+			}
 
             int br, bg, bb, ba;
-            if(type[4] == '_'){ br = -1; } else { br = std::stoi(std::string(1, type[4])); }
-            if(type[5] == '_'){ bg = -1; } else { bg = std::stoi(std::string(1, type[5])); }
-            if(type[6] == '_'){ bb = -1; } else { bb = std::stoi(std::string(1, type[6])); }
-            if(type[7] == '_'){ ba = -1; } else { ba = std::stoi(std::string(1, type[7])); }
+			try
+			{
+				if (type[4] == '_') { br = -1; }
+				else { br = std::stoi(std::string(1, type[4])); }
+				if (type[5] == '_') { bg = -1; }
+				else { bg = std::stoi(std::string(1, type[5])); }
+				if (type[6] == '_') { bb = -1; }
+				else { bb = std::stoi(std::string(1, type[6])); }
+				if (type[7] == '_') { ba = -1; }
+				else { ba = std::stoi(std::string(1, type[7])); }
+			}
+			catch (const std::invalid_argument& ex)
+			{
+				throw std::invalid_argument(
+					std::string("Invalid format! [BITS_OV_MASK]\n") + ex.what()
+				);
+			}
 
-            if(type[8] != VALUE_DESIGNATOR) { exit(-3); }
-            std::string_view fstr = type.substr(9);
-            float val = std::stof(std::string(fstr));
-            availability_threshold th;
-            th.data_type = vdt;
-            th.direction = dir;
-            th.value = val;
-            th.bits = pixel_availability(br, bg, bb, ba);
+            if(type[8] != VALUE_DESIGNATOR)
+			{ 
+				throw std::invalid_argument("Invalid threshold format! [VALUE_DESIGNATOR]");
+			}
+			
+			std::string_view fstr = type.substr(9);
+			float val;
+
+			try
+			{
+				val = std::stof(std::string(fstr));
+			}
+			catch (const std::invalid_argument & ex)
+			{
+				throw std::invalid_argument(
+					std::string("Invalid format! [VALUE]\n") + ex.what()
+				);
+			}
+
+			availability_threshold th;
+			th.data_type = vdt;
+			th.direction = dir;
+			th.value = val;
+			th.bits = pixel_availability(br, bg, bb, ba);
+			
             result.push_back(th);
         }
         return result;
@@ -193,7 +229,7 @@ namespace xsteg
         for(size_t thi = 0; thi < _thresholds.size(); ++thi)
         {
             auto& thres = _thresholds[thi];
-            const size_t report_threshold_px = 400000 + std::abs(rand() % 100000); // report progress every x pixels
+            const size_t report_threshold_px = (size_t)400000 + std::abs(rand() % 100000l); // report progress every x pixels
             const std::vector<float>& vdata = vdata_maps.at(thres.data_type);
             for(size_t pxi = from_px; pxi < to_px; ++pxi)
             {
@@ -278,7 +314,7 @@ namespace xsteg
                     &availability_map::apply_thresholds_segment,
                     this,
                     i * thread_segment_size,
-                    ((i + 1) * thread_segment_size) - 1,
+                    (((size_t)i + 1) * thread_segment_size) - 1,
                     vdata_maps
                 )
             );
@@ -308,10 +344,10 @@ namespace xsteg
             [](size_t accum, const pixel_availability& av) -> size_t
             {
                 return accum + (
-                    std::max(av.r, 0) + 
-                    std::max(av.g, 0) + 
-                    std::max(av.b, 0) + 
-                    std::max(av.a, 0));
+                    std::max<size_t>(av.r, 0) +
+                    std::max<size_t>(av.g, 0) + 
+                    std::max<size_t>(av.b, 0) + 
+                    std::max<size_t>(av.a, 0));
             }
         );
     }
