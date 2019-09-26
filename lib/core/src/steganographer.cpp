@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 
 namespace xsteg
 {
@@ -105,16 +106,14 @@ namespace xsteg
 
         if(available_space < bit_len)
         {
-            std::cerr << "Not enough available space to encode data!" << std::endl;
-            std::cerr 
-                << "Requested [" 
-                << bit_len
-                << "]b to encode, while "
-                << "maximum allowed space is [" 
-                << available_space 
-                << "]b for the given destination and thresholds."
-                << std::endl;
-            exit(-77);
+            std::stringstream ss;
+            ss << "Not enough available space to encode data! "
+               << "Requested [" 
+               << bit_len
+               << "]b to encode, while maximum allowed space is [" 
+               << available_space 
+               << "]b for the given destination and thresholds.";
+            throw std::overflow_error(ss.str());
         }
 
         bit_view bits(inter_data.data(), bit_len);
