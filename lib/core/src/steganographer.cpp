@@ -4,6 +4,7 @@
 #include <xsteg/bit_view.hpp>
 #include <xsteg/runtime_settings.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cstring>
 #include <iostream>
@@ -120,9 +121,9 @@ namespace xsteg
         size_t report_counter = 0;
 
         size_t current_bit = 0;
-        auto request_bits = [&](size_t count) -> std::vector<bool>
+        auto request_bits = [&](int count) -> std::vector<bool>
         {
-            auto result = bits.get_bits_at(current_bit, count);
+            auto result = bits.get_bits_at(current_bit, std::max(count, 0));
             size_t added_bits = result.size();
             current_bit += added_bits;
             report_counter += added_bits;
