@@ -34,7 +34,14 @@ main_args parse_main_args(int argc, char** argv)
 {
     int current_arg = 1;
     main_args result;
-    auto next_arg = [&]() -> std::string { return std::string(argv[current_arg++]); };
+    auto next_arg = [&]() -> std::string 
+	{ 
+		if (current_arg >= argc)
+		{
+			throw std::out_of_range("Not enough arguments!");
+		}
+		return std::string(argv[current_arg++]); 
+	};
 
     while (current_arg < argc)
     {
@@ -106,6 +113,10 @@ main_args parse_main_args(int argc, char** argv)
         {
             std::string datafile = next_arg();
             std::ifstream ifs(datafile, std::ios::binary | std::ios::ate);
+			if (!ifs)
+			{
+				throw std::invalid_argument("Unable to open datafile: " + datafile);
+			}
             size_t fsize = static_cast<size_t>(ifs.tellg());
 
             result.data.clear();

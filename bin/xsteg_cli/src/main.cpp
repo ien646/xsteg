@@ -305,24 +305,35 @@ void resize_pro(main_args args)
     resized.write_to_file(args.output_img);
 }
 
+#include <filesystem>
+
 int main(int argc, char** argv)
-{
-    main_args margs = parse_main_args(argc, argv);
-    switch (margs.mode)
-    {
-        case encode_mode::NOT_SET:
-        {
-            std::cerr << "Encoding mode not set! (-h for help)" << std::endl;
-            return -1;
-        }
-        case encode_mode::ENCODE: { encode(margs); break; }
-        case encode_mode::DECODE: { decode(margs); break; }
-        case encode_mode::DIFF_MAP: { diff_map(margs); break; }
-        case encode_mode::VDATA_MAPS: { vdata_maps(margs); break; }
-        case encode_mode::HELP: { std::cout << help_text << std::endl; break; }
-        case encode_mode::GENERATE_KEY:{ gen_key(margs); break; }
-        case encode_mode::RESIZE_ABSOLUTE: { resize_abs(margs); break; }
-        case encode_mode::RESIZE_PROPORTIONAL: { resize_pro(margs); break; }
-    }
+{	
+	std::cout << std::filesystem::current_path() << std::endl;
+	try
+	{
+		main_args margs = parse_main_args(argc, argv);
+		switch (margs.mode)
+		{
+		case encode_mode::NOT_SET:
+		{
+			std::cerr << "Encoding mode not set! (-h for help)" << std::endl;
+			return -1;
+		}
+		case encode_mode::ENCODE: { encode(margs); break; }
+		case encode_mode::DECODE: { decode(margs); break; }
+		case encode_mode::DIFF_MAP: { diff_map(margs); break; }
+		case encode_mode::VDATA_MAPS: { vdata_maps(margs); break; }
+		case encode_mode::HELP: { std::cout << help_text << std::endl; break; }
+		case encode_mode::GENERATE_KEY: { gen_key(margs); break; }
+		case encode_mode::RESIZE_ABSOLUTE: { resize_abs(margs); break; }
+		case encode_mode::RESIZE_PROPORTIONAL: { resize_pro(margs); break; }
+		}
+	}
+	catch (const std::exception & ex)
+	{
+		std::cerr << ex.what() << std::endl;
+		return -1;
+	}
     return 0;
 }
