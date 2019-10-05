@@ -138,10 +138,10 @@ namespace xsteg
 
             if(!av_bits.is_useless())
             {
-                if(av_bits.r) { set_last_bits(pxptr + 0, request_bits(av_bits.r)); }
-                if(av_bits.g) { set_last_bits(pxptr + 1, request_bits(av_bits.g)); }
-                if(av_bits.b) { set_last_bits(pxptr + 2, request_bits(av_bits.b)); }
-                if(av_bits.a) { set_last_bits(pxptr + 3, request_bits(av_bits.a)); }
+                if(av_bits.r) { set_last_bits(pxptr + 0, request_bits(std::max(av_bits.r, 0))); }
+                if(av_bits.g) { set_last_bits(pxptr + 1, request_bits(std::max(av_bits.g, 0))); }
+                if(av_bits.b) { set_last_bits(pxptr + 2, request_bits(std::max(av_bits.b, 0))); }
+                if(av_bits.a) { set_last_bits(pxptr + 3, request_bits(std::max(av_bits.a, 0))); }
             }
 
             ++space_it;

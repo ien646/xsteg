@@ -320,10 +320,10 @@ namespace xsteg
             [](size_t accum, const pixel_availability& av) -> size_t
             {
                 return accum + (
-                    std::max<size_t>(av.r, 0) +
-                    std::max<size_t>(av.g, 0) + 
-                    std::max<size_t>(av.b, 0) + 
-                    std::max<size_t>(av.a, 0));
+                    static_cast<size_t>(std::max<int>(av.r, 0)) +
+                    static_cast<size_t>(std::max<int>(av.g, 0)) +
+                    static_cast<size_t>(std::max<int>(av.b, 0)) +
+                    static_cast<size_t>(std::max<int>(av.a, 0)));
             }
         );
     }
