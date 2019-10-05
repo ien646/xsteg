@@ -2,12 +2,10 @@
 
 #include <xsteg/bit_tools.hpp>
 #include <xsteg/bit_view.hpp>
-#include <xsteg/runtime_settings.hpp>
 
 #include <algorithm>
 #include <cassert>
 #include <cstring>
-#include <iostream>
 #include <sstream>
 
 namespace xsteg
@@ -126,25 +124,15 @@ namespace xsteg
             auto result = bits.get_bits_at(current_bit, std::max(count, 0));
             size_t added_bits = result.size();
             current_bit += added_bits;
-            report_counter += added_bits;
             return result;
         };
 
         size_t cur_pixel = 0;
         auto space_it = space_map.begin();
 
-        std::cout << "Encoding data..." << std::endl;
-
-        size_t report_threshold = std::max(bit_len / 250, (size_t)1);
-
         // Encode data
         while(current_bit < bit_len)
         {
-            if((report_counter > report_threshold) && runtime_settings::verbose)
-            {
-                report_counter = 0;
-                std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
-            }
             auto av_bits = *space_it;
             uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
@@ -159,17 +147,13 @@ namespace xsteg
             ++space_it;
             ++cur_pixel;
         }
-        std::cout << "(bits)[" << current_bit << "/" << bit_len 
-            << "] COMPLETE!" << std::endl;
     }
 
     std::vector<uint8_t> steganographer::read_data()
     {
         size_t init_data_px_idx = 0;
 
-        std::cout << "Decoding size header..."  << std::endl;
         size_t bit_len = decode_size_header(init_data_px_idx);
-        std::cout << "Done! [" << bit_len << "]bits" << std::endl;
 
         std::vector<bool> read_bits;
         read_bits.reserve(bit_len);
@@ -179,7 +163,6 @@ namespace xsteg
         size_t cur_pixel = 0;
         auto space_it = space_map.begin();
 
-        std::cout << "Reading data..." << std::endl;
         size_t report_counter = 0;
         size_t current_bit = 0;
 
@@ -195,12 +178,7 @@ namespace xsteg
         size_t report_threshold = std::max(bit_len / 1000, (size_t)1);
 
         while(current_bit < bit_len)
-        {
-            if((report_counter > report_threshold) && runtime_settings::verbose)
-            {
-                report_counter = 0;
-                std::cout << "(bits)[" << current_bit << "/" << bit_len << "]\r";
-            }
+        {            
             auto av_bits = *space_it;
             uint8_t* pxptr = _img->data() + (cur_pixel * 4);
 
@@ -228,9 +206,6 @@ namespace xsteg
             ++cur_pixel;
         }
 
-        std::cout << "(bits)[" << current_bit << "/" << bit_len 
-            << "] COMPLETE!" << std::endl;
-
         auto allbytes = get_bytes_from_bits(read_bits, 8);
         size_t byte_count = (bit_len / 8) - 8;
         std::vector<uint8_t> result;
@@ -242,9 +217,7 @@ namespace xsteg
 
     void steganographer::save_to_file(const std::string& fname)
     {
-        std::cout << "Saving to file... [" << fname << "]" << std::endl;
         _img->write_to_file(fname);
-        std::cout << "Done!" << std::endl;
     }
 
     size_t steganographer::decode_size_header(size_t& skipped_pixels)

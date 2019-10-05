@@ -7,7 +7,6 @@
 #include <mutex>
 
 #include <xsteg/steganographer.hpp>
-#include <xsteg/runtime_settings.hpp>
 #include <xsteg/task_queue.hpp>
 
 #include "utils.hpp"

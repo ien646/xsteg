@@ -1,6 +1,5 @@
 #include <xsteg/availability_map.hpp>
 
-#include <xsteg/runtime_settings.hpp>
 #include <xsteg/synced_print.hpp>
 
 #include <strutils/strutils.hpp>
@@ -8,7 +7,6 @@
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <iostream>
 #include <map>
 #include <mutex>
 #include <sstream>
@@ -201,7 +199,7 @@ namespace xsteg
         _modified = false;
 
         static const unsigned int max_threads = std::thread::hardware_concurrency();
-        if(runtime_settings::multithreaded && (max_threads > 1))
+        if((max_threads > 1))
         {
             apply_thresholds_mt(max_threads);
         }
@@ -209,16 +207,6 @@ namespace xsteg
         {
             apply_thresholds_st();
         }
-    }
-
-    void print_apply_thres_sgmt_prog(size_t th_idx, size_t px_idx, size_t from_px, size_t to_px)
-    {
-        int64_t current_px_seg_idx = (to_px - from_px) - (to_px - px_idx);
-        std::stringstream sstr;
-        sstr << "THRES[" << th_idx << "] "
-             << "SEG["<< from_px << " ~ " << to_px <<"] "
-             << "PX[" << current_px_seg_idx << "/" << (to_px - from_px) << "]";
-        synced_print(sstr.str(), true);
     }
 
     void availability_map::apply_thresholds_segment(
@@ -249,18 +237,6 @@ namespace xsteg
                     if(thres.bits.a >= 0)
                         { _map[pxi].a = thres.bits.a; }
                 }
-                if(runtime_settings::verbose)
-                {
-                    size_t current_px_seg_idx = (to_px - pxi) - from_px;
-                    if(current_px_seg_idx % report_threshold_px == 0)
-                    {
-                        print_apply_thres_sgmt_prog(thi, pxi, from_px, to_px);
-                    }
-                }
-            }
-            if(runtime_settings::verbose)
-            {
-                print_apply_thres_sgmt_prog(thi, to_px, from_px, to_px);
             }
         }
     }
